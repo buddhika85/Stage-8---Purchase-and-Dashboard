@@ -198,6 +198,7 @@
       <DependentUpon>BcmyModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\ChartsViewModels\CountrySalesPurchaseDeviation.cs" />
     <Compile Include="ViewModels\ChartsViewModels\ExchangeRateDeviationVm.cs" />
     <Compile Include="ViewModels\ContactsViewModel.cs" />
     <Compile Include="ViewModels\NegotiationViewModel.cs" />

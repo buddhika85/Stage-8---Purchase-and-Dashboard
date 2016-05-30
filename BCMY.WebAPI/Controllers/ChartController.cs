@@ -5,6 +5,8 @@ using GenericRepository_UnitOfWork.GR;
 using GenericRepository_UnitOfWork.UOW;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -46,6 +48,13 @@ namespace BCMY.WebAPI.Controllers
                         {
                             IEnumerable<ExchangeRateDeviationVm> chartData = currencyRepository.SQLQuery<ExchangeRateDeviationVm>("SP_GetChartsExchangeRatesDeviation").
                                 ToList<ExchangeRateDeviationVm>();
+                            resultJson = jss.Serialize(chartData);
+                            break;
+                        }
+                    case "COUNTRY_SALES_DEVIATION":
+                        {
+                            IEnumerable<CountrySalesPurchaseDeviationVm> chartData = currencyRepository.SQLQuery<CountrySalesPurchaseDeviationVm>("SP_GetChartsSalesPurchasesCountryDeviation @orderType", new SqlParameter("orderType", SqlDbType.VarChar) { Value = "sales"}).
+                                ToList<CountrySalesPurchaseDeviationVm>();
                             resultJson = jss.Serialize(chartData);
                             break;
                         }

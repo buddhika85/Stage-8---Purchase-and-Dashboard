@@ -16,6 +16,7 @@
             $("#loggedInUserWithTime").text(localStorage["userName"]);
             vm.exchangeRatesDateJson = null;
             DrawExchangeRatesChart($http);
+            //DrawSalesByCountryChart($http);
             blockUI.stop();
         }
         else {
@@ -53,6 +54,37 @@
             // or server returns response with an error status.
             alert('Web Service access error');
         });        
+    }
+
+
+    // used to draw the exchange rates chart
+    // Ref - https://developers.google.com/chart/interactive/docs/gallery/linechart?hl=en
+    function DrawSalesByCountryChart($http) {
+        $http.get('https://localhost:44302/api/Chart?chartName=COUNTRY_SALES_DEVIATION').
+        then(function (response) {
+            debugger
+            // adapting data to the google charts
+            var array = $.parseJSON('[' + response.data + ']');
+            var dataArray = [['Country', 'Sales']];
+            for (var i = 0; i < array[0].length; i++) {
+                dataArray.push([array[0][i].Country, array[0][i].TotalValue]);
+            }
+
+            var data = new google.visualization.arrayToDataTable(dataArray);
+            var options = {
+                title: 'Country wise sales Deviation',                
+                textStyle: { color: 'blue', fontSize: 16 }
+                ////curveType: 'function',
+                //legend: { position: 'bottom' }
+            };
+            
+            var chart = new google.visualization.GeoChart(document.getElementById('geoChartSalesByCountry'));
+            chart.draw(data, options);
+        }, function (response) {
+            // called asynchronously if an error occurs
+            // or server returns response with an error status.
+            alert('Web Service access error');
+        });
     }
     
  
