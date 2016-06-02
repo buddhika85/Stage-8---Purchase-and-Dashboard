@@ -2,13 +2,94 @@
     <h4>{{vm.title}}</h4>
     <br />
 
-    <!-- panel for - Product information-->
+    <!-- panel for - Download to excel-->
     <div class="panel panel-default">
 
         <div class="panel-body">
 
             <fieldset>
-                <legend style="font-size:medium;" id="productSearchPanelHeading" class="panel-heading">Product information</legend>
+                <legend style="font-size:medium;" id="productSearchPanelHeading" class="panel-heading">Product information Excel download</legend>
+
+                <div id="productSerahcForm">
+                    <!--Information on search-->
+                    <div class="form-group row">
+                        <p class="col-md-12">
+                            <kbd>IMPORTANT:</kbd>&nbsp;&nbsp;
+                            To download stock information excel - first select the product <code>category</code>,
+                            then based on that the <code>condition</code>, then the <code>brand</code>
+                            and finally the <code>model</code>. All are mandatory selections.
+                        </p>
+                    </div>
+
+                    <div class="form-group row">
+
+                        <!--category selection-->
+                        <label for="selectCategoryExc" class="control-label col-md-1 fontWeightNormal">Category</label>
+                        <div class="col-md-4">
+                            <select id="selectCategoryExc" multiple ng-model="vm.categoriesSelected" ng-change="vm.onCategoriesSelection()" ng-class="vm.categoriesClass" ng-disabled="{{vm.selectCategoryDisabled}}">
+                                <option ng-repeat="category in vm.categories" value="{{category.productCategoryID}}">{{category.productCatergoryName}}</option>
+                            </select>
+                        </div>
+
+                        <!--condition selection-->
+                        <label for="selectConditionExc" class="control-label col-md-1 fontWeightNormal">Condition</label>
+                        <div class="col-md-4">
+                            <select id="selectConditionExc" multiple ng-model="vm.conditionsSelected" ng-change="vm.onConditionsSelection()" ng-disabled="{{vm.selectConditionDisabled}}">                                
+                                <option ng-repeat="condition in vm.conditions" value="{{condition.conditionID}}">{{condition.conditionName}}</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <button class="col-md-12 fontWeightNormal" ng-click="vm.resetSearchExc()" id="resetBtn" ng-disabled="{{vm.resetSearchBtnDisabled}}">Reset Excel Filter</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+
+                        <!--brand selection-->
+                        <label for="selectBrandExc" class="control-label col-md-1 fontWeightNormal">Brand</label>
+                        <div class="col-md-4">
+                            <select id="selectBrandExc" multiple ng-change="vm.onBrandsSelection()" ng-model="vm.brandsSelected" ng-disabled="{{vm.selectBrandDisabled}}">                                
+                                <option ng-repeat="brand in vm.brands" value="{{brand.productbrandid}}">{{brand.productbrandname}}</option>
+                            </select>
+                        </div>
+
+                        <!--model selection-->
+                        <label for="selectModelExc" class="control-label col-md-1 fontWeightNormal">Model</label>
+                        <div class="col-md-4">
+                            <select id="selectModelExc" multiple ng-model="vm.modelsSelected" ng-disabled="{{vm.selectModelDisabled}}">
+                                <!--<option>---- Select Model ----</option>-->
+                                <option ng-repeat="model in vm.models" value="{{model.productListId}}">{{model.model}}</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <button class="col-md-12 fontWeightNormal" ng-click="vm.downloadExcel()" id="btnDownloadExcel"
+                                    ng-disabled="{{vm.amendStockBtnDisabled}}">
+                                Download Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!--error message-->
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <label class="control-label fontWeightNormal" style="color:red" id="lblErrorMessageExc"></label>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+        </div>
+    </div>
+
+    <!-- panel for - Amend stock of a single model-->
+    <div class="panel panel-default">
+
+        <div class="panel-body">
+
+            <fieldset>
+                <legend style="font-size:medium;" id="productSearchPanelHeading" class="panel-heading">Amend stock count - single model</legend>
 
                 <div id="productSerahcForm">
                     <!--Information on search-->

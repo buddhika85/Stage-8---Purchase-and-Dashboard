@@ -158,6 +158,65 @@ namespace BCMY.WebAPI.Controllers
             }
         }
 
+        // Returns all conditions by categoryIds comma list
+        [HttpGet, ActionName("GetConditionsByCategory")]
+        public IEnumerable<productCondition> GetConditionsByCategories(string categoriesCsv)
+        {
+            try
+            {                
+                // call stored procedure via repository
+                var result = productConditionRepository.SQLQuery<productCondition>("SP_GetConditionsByCategoryIDs @categoriesCsv",
+                    new SqlParameter("categoriesCsv", SqlDbType.VarChar) { Value = categoriesCsv });
+                // convert the result to a view model object list
+                IEnumerable<productCondition> conditionsByCategory = result.ToList<productCondition>();
+                return conditionsByCategory;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        // Returns all the brands by the cetagories and conditions
+        [HttpGet, ActionName("GetBrandByCondition")]
+        public IEnumerable<productbrand> GetBrandByCondition(string categoriesCsv, string conditionsCsv)
+        {
+            try
+            {
+                // call stored procedure via repository
+                var result = productConditionRepository.SQLQuery<productbrand>("SP_GetBrandsByConditionsAndCategories @categoriesCsv, @conditionsCsv",
+                    new SqlParameter("categoriesCsv", SqlDbType.VarChar) { Value = categoriesCsv },
+                    new SqlParameter("conditionsCsv", SqlDbType.VarChar) { Value = conditionsCsv });
+                // convert the result to a view model object list
+                IEnumerable<productbrand> brandsByCondition = result.ToList<productbrand>();
+                return brandsByCondition;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        [HttpGet, ActionName("GetModelsByBrand")]
+        public IEnumerable<ProductModelViewModel> GetModelsByBrand(string categoriesCsv, string conditionsCsv, string brandsCsv)
+        {
+            try
+            {
+                // call stored procedure via repository
+                var result = productConditionRepository.SQLQuery<ProductModelViewModel>("SP_GetModelsByBrandsConditionsAndCategories @categoriesCsv, @conditionsCsv, @brandsCsv",
+                    new SqlParameter("categoriesCsv", SqlDbType.VarChar) { Value = categoriesCsv },
+                    new SqlParameter("conditionsCsv", SqlDbType.VarChar) { Value = conditionsCsv },
+                    new SqlParameter("brandsCsv", SqlDbType.VarChar) { Value = brandsCsv });
+                // convert the result to a view model object list
+                IEnumerable<ProductModelViewModel> modelsByBrand = result.ToList<ProductModelViewModel>();
+                return modelsByBrand;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
         // Returns all conditions by condition Id
         // http://localhost:61945/api/ProductInfo?categoryId=1&conditionId=2
         [HttpGet, ActionName("GetBrandByCondition")]

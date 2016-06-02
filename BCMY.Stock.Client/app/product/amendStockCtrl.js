@@ -15,7 +15,7 @@
             vm.messageHeadersForEnc = {
                 'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer ' + localStorage["access_token"]
             };
-            prepareInitialUI(vm);
+            vm = prepareInitialUI(vm);
             wireCommands(vm);
             authoriseButtonAccess(vm);
         }
@@ -30,7 +30,7 @@
     // used to define and assign initial values to the model properties
     function defineModel(vm, httpService, blockUI)
     {
-        vm.title = "Amend product stock counts";
+        vm.title = "Amend/Download product stock counts";
         vm.httpService = httpService;                 // http service
         vm.blockUI = blockUI;
         vm.productId = "";
@@ -53,28 +53,68 @@
         RemoveOutlineBorders($('#selectCategory'));
         $('#countedSpan').html('');
         drawProductsGrid(vm);
-        populateCategoryDropDown(vm);
+        vm = populateCategoryDropDown(vm);
+        vm = prepareExcelDownloadPanel(vm);
         vm.blockUI.stop();
+
+        return vm;
     }
 
-    // used to populate the product category drop down menu
-    function populateCategoryDropDown(vm) {
+    // used to initialise UI components of the excel download panel
+    function prepareExcelDownloadPanel(vm)
+    {        
         vm.httpService({
             method: "get",
             headers: vm.messageHeadersForEnc,
             url: ('https://localhost:44302/api/productinfo/getcategories?getcategories=true'),
         }).success(function (data) {
-            var listitems = '<option value=-1 selected="selected">---- Select Category ----</option>';
-            $.each(data, function (index, item) {
-                listitems += '<option value=' + item.productCategoryID + '>' + item.productCatergoryName + '</option>';
-            });
-            $("#selectCategory option").remove();
-            $("#selectCategory").append(listitems);
+            //debugger
+            data.unshift({ productCategoryID: '-1', productCatergoryName: '---- Select Category ----' });  // add element on top of the category list for select data bind
+            vm.categories = data;
+            initConditionBrandModelSelLists(vm);
         }
         ).error(function (data) {
             // display error message
             alert('error - web service access')
         });
+               
+        return vm;
+    }
+
+    // used to populate the product category drop down menu
+    function populateCategoryDropDown(vm) {
+        if (vm.categories == null || vm.categories.length == 0) {
+            vm.httpService({
+                method: "get",
+                headers: vm.messageHeadersForEnc,
+                url: ('https://localhost:44302/api/productinfo/getcategories?getcategories=true'),
+            }).success(function (data) {
+                //debugger
+                vm.categories = data;
+                //vm.categories.unshift({ productCategoryID: '-1', productCatergoryName: '---- Select Category ----' });  // add element on top of the roles list for select data bind
+
+                var listitems = '<option value=-1 selected="selected">---- Select Category ----</option>';
+                $.each(data, function (index, item) {
+                    listitems += '<option value=' + item.productCategoryID + '>' + item.productCatergoryName + '</option>';
+                });
+                $("#selectCategory option").remove();
+                $("#selectCategory").append(listitems);
+            }
+            ).error(function (data) {
+                // display error message
+                alert('error - web service access')
+            });
+        }
+        else {
+            var listitems = '<option value=-1 selected="selected">---- Select Category ----</option>';
+            $.each(vm.categories, function (index, item) {
+                listitems += '<option value=' + item.productCategoryID + '>' + item.productCatergoryName + '</option>';
+            });
+            $("#selectCategory option").remove();
+            $("#selectCategory").append(listitems);
+        }
+
+        return vm;
     }
 
     // binding commands to buttons
@@ -107,15 +147,128 @@
         };
 
         vm.saveStockAmendment = function () {
-            vm.blockUI.start();            
+            vm.blockUI.start();
             if (vm.stockCount != null && $.trim(vm.stockCount) != '') {
                 saveStockAmendment(vm);
             }
             else {
                 ApplyErrorBorder($('#stockCount'));
-                DisplayErrorMessage('Error : You should provide a stock count', $('#lblErrorMessagePopup')); 
+                DisplayErrorMessage('Error : You should provide a stock count', $('#lblErrorMessagePopup'));
             }
             vm.blockUI.stop();
+        };
+
+        // excel download related commands
+        vm.resetSearchExc = function () {            
+            prepareExcelDownloadPanel(vm);
+        };
+
+        vm.downloadExcel = function () {
+            downloadExcel(vm);
+        };
+
+        // on categories select list selected
+        vm.onCategoriesSelection = function () {
+            onCategoriesSelection(vm.categoriesSelected, vm);
+        };
+
+        // on condition select list selection
+        vm.onConditionsSelection = function () {            
+            onConditionsSelection(vm.conditionsSelected, vm.categoriesSelected, vm);
+        };
+
+        // on brands select list slection
+        vm.onBrandsSelection = function () {
+            onBrandsSelection(vm.conditionsSelected, vm.categoriesSelected, vm.brandsSelected, vm);
+        };
+    }
+
+    // used populate models based on conditions, categories and brands selection
+    function onBrandsSelection(conditionsSelected, categoriesSelected, brandsSelected, vm)
+    {
+        if (categoriesSelected != null && categoriesSelected != -1 && conditionsSelected != null && conditionsSelected != -1 && brandsSelected != null && brandsSelected != -1) {
+            vm.models = null;
+            //alert(categoriesSelected + conditionsSelected);
+            vm.httpService({
+                method: "get",
+                headers: vm.messageHeadersForEnc,
+                url: ('https://localhost:44302/api/ProductInfo?categoriesCsv=' + categoriesSelected + '&conditionsCsv=' + conditionsSelected + '&brandsCsv=' + brandsSelected),
+            }).success(function (data) {
+                //debugger
+                data.unshift({ productListId: '-1', model: '---- Select Model ----' });  // add element on top of the roles list for select data bind
+                vm.models = data;
+            }
+            ).error(function (data) {
+                debugger
+                // display error message
+                alert('error - web service access - models DDL population - please contact IT helpdesk');
+                vm.models = [{ productListId: '-1', model: '---- Select Model ----' }];
+            });
+        }
+        else {
+            // reset other select lists
+            //debugger
+            vm.models = [{ productListId: '-1', model: '---- Select Model ----' }];
+        }
+    }
+
+    // used to populate brands based on conditions and categories selected
+    function onConditionsSelection(conditionsSelected, categoriesSelected, vm)
+    {        
+        if (categoriesSelected != null && categoriesSelected != -1 && conditionsSelected != null && conditionsSelected != -1)
+        {
+            vm.brands = null;            
+            //alert(categoriesSelected + conditionsSelected);
+            vm.httpService({
+                method: "get",
+                headers: vm.messageHeadersForEnc,
+                url: ('https://localhost:44302/api/ProductInfo?categoriesCsv=' + categoriesSelected + '&conditionsCsv=' + conditionsSelected),
+            }).success(function (data) {
+                //debugger
+                data.unshift({ productbrandid: '-1', productbrandname: '---- Select Brand ----' });  // add element on top of the roles list for select data bind
+                vm.brands = data;
+            }
+            ).error(function (data) {
+                debugger
+                // display error message
+                alert('error - web service access - brands DDL population - please contact IT helpdesk');
+                vm.brands = [{ productbrandid: '-1', productbrandname: '---- Select Brand ----' }];
+            });
+        }
+        else {
+            // reset other select lists
+            //debugger
+            vm.brands = [{ productbrandid: '-1', productbrandname: '---- Select Brand ----' }];
+            vm.models = [{ productListId: '-1', model: '---- Select Model ----' }];
+        }
+    }
+
+    // used to populate conditions based on categories seleted
+    function onCategoriesSelection(categoriesSelected, vm)
+    {     
+        if (categoriesSelected != null && categoriesSelected != -1) {
+            vm.conditions = null;
+            // populate dependant DDL - condition
+            vm.httpService({
+                method: "get",
+                headers: vm.messageHeadersForEnc,
+                url: ('https://localhost:44302/api/productinfo/GetConditionsByCategories?categoriesCsv=' + categoriesSelected),
+            }).success(function (data) {
+                //debugger
+                data.unshift({ conditionID: '-1', conditionName: '---- Select Condition ----' });  // add element on top of the roles list for select data bind
+                vm.conditions = data;                
+            }
+            ).error(function (data) {
+                debugger
+                // display error message
+                alert('error - web service access - condition DDL population - please contact IT helpdesk');
+                vm.conditions = [{ conditionId: '-1', conditionName: '---- Select Condition ----' }];
+            });
+        }
+        else {
+            // reset other select lists
+            //debugger
+            initConditionBrandModelSelLists(vm);
         }
     }
 
@@ -390,6 +543,7 @@
 
     // on product category ddl is changed
     function onCategorySelection(vm, ddl) {
+        debugger
         //alert('category changed : ' + ddl.val());
         var selectedCategory = ddl.val();
         var listitems = '<option value=-1 selected="selected">---- Select Condition ----</option>';
@@ -404,6 +558,7 @@
                 headers: vm.messageHeadersForEnc,
                 url: ('https://localhost:44302/api/productinfo/categoryId?categoryId=' + selectedCategory),
             }).success(function (data) {
+                debugger
                 //alert(data.length);
                 $.each(data, function (index, item) {
                     listitems += '<option value=' + item.conditionID + '>' + item.conditionName + '</option>';
@@ -523,4 +678,17 @@
     function RemoveOutlineBorders(element) {
         element.removeClass("errorBorder");
     }
+
+    // used to download excel file
+    function downloadExcel(vm) {
+        alert(vm.modelsSelected);
+    }
+
+    // used to reset select lists
+    function initConditionBrandModelSelLists(vm) {
+        vm.conditions = [{ conditionId: '-1', conditionName: '---- Select Condition ----' }];
+        vm.brands = [{ productbrandid: '-1', productbrandname: '---- Select Brand ----' }];
+        vm.models = [{ productListId: '-1', model: '---- Select Model ----' }];
+    }
+
 }());
