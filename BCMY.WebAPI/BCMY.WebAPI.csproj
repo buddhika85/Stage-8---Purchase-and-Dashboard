@@ -259,6 +259,7 @@
     <Compile Include="Util\Encryption\RijndaelHelper.cs" />
     <Compile Include="Util\Enums.cs" />
     <Compile Include="Util\GeneralValidator.cs" />
+    <Compile Include="Util\HtmlTableGenerator.cs" />
     <Compile Include="Util\OrderLineNegotiationValidator.cs" />
     <Compile Include="Util\Encryption\StringCipherEncryptDecrypt.cs" />
     <Compile Include="Util\ViewModelConvertor.cs" />

@@ -1,6 +1,7 @@
 ﻿using BCMY.WebAPI.Controllers.admin;
 using BCMY.WebAPI.Models;
 using BCMY.WebAPI.Models.UnityDI;
+using BCMY.WebAPI.Util;
 using DataAccess_EF.EntityFramework;
 using DataAccess_EF.ViewModels;
 using GenericRepository_UnitOfWork.GR;
@@ -9,11 +10,15 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
+
 
 namespace BCMY.WebAPI.Controllers
 {
@@ -216,6 +221,38 @@ namespace BCMY.WebAPI.Controllers
                 return null;
             }
         }
+
+        // Returns all conditions by categoryIds comma list
+        [HttpPost, ActionName("GenerateStockReports")]
+        public HttpResponseMessage GenerateStockReports(string modelsCsv)
+        {            
+            try
+            {
+                // call stored procedure via repository
+                var result = productConditionRepository.SQLQuery<ProductStockInfoViewModel>("SP_GetProductStockInfo @modelsCsv",
+                    new SqlParameter("modelsCsv", SqlDbType.VarChar) { Value = modelsCsv });
+                // convert the result to a view model object list
+                IEnumerable<ProductStockInfoViewModel> stockInfoModels = result.ToList<ProductStockInfoViewModel>();
+
+                byte[] temp = System.Text.Encoding.UTF8.GetBytes(new HtmlTableGenerator().GenerateModelStockInfoHtmlTable(stockInfoModels).ToString());
+
+
+                //FileStream stream = File.OpenRead(@"E:\KTP Project\Dropbox\Stage 7 - User login\prodstock.xlsx");
+                //byte[] fileBytes = new byte[stream.Length];
+ 
+                HttpResponseMessage resultH = new HttpResponseMessage(HttpStatusCode.OK);
+                resultH.Content = new ByteArrayContent(temp);
+                resultH.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.ms-excel");
+                resultH.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+                resultH.Content.Headers.ContentDisposition.FileName = "prodstock.xlsx";
+                return resultH;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
 
         // Returns all conditions by condition Id
         // http://localhost:61945/api/ProductInfo?categoryId=1&conditionId=2

@@ -682,6 +682,25 @@
     // used to download excel file
     function downloadExcel(vm) {
         alert(vm.modelsSelected);
+        vm.httpService({
+            method: "post",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer ' + localStorage["access_token"],
+                'Accept': 'application/vnd.ms-excel'
+            },
+            url: ('https://localhost:44302/api/productinfo/GetConditionsByCategories?modelsCsv=' + vm.modelsSelected),
+            responseType: 'arraybuffer'
+        }).success(function (data) {
+            var blob = new Blob([data], { type: "application/vnd.ms-excel" });
+            var objectUrl = URL.createObjectURL(blob);
+            window.open(objectUrl);
+        }
+        ).error(function (data) {
+            debugger
+            // display error message
+            alert('error - web service access - condition DDL population - please contact IT helpdesk');
+            vm.conditions = [{ conditionId: '-1', conditionName: '---- Select Condition ----' }];
+        });
     }
 
     // used to reset select lists

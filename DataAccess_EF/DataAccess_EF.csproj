@@ -206,6 +206,7 @@
     <Compile Include="ViewModels\OrderViewModel.cs" />
     <Compile Include="ViewModels\ProductBrandViewModel.cs" />
     <Compile Include="ViewModels\ProductModelViewModel.cs" />
+    <Compile Include="ViewModels\ProductStockInfoViewModel.cs" />
     <Compile Include="ViewModels\Status.cs" />
   </ItemGroup>
   <ItemGroup />
