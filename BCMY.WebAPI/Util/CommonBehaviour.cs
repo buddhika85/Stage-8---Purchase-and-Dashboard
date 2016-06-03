@@ -139,5 +139,40 @@ namespace BCMY.WebAPI.Util
             tempPassword = string.Format("{0}fH%1", System.Web.Security.Membership.GeneratePassword(6, 1));
             return tempPassword;
         }
+
+        /// <summary>
+        /// Gets currency symbol 
+        /// </summary>
+        /// <returns></returns>
+        public static string GetCurrencySymbol(string currency)
+        {
+            string symbol = string.Empty;
+            currency = currency.ToLower();
+            switch (currency)
+            {
+                case("gbp") :{
+                        symbol = "£";
+                        break;
+                    }
+                case ("usd"):
+                    {
+                        symbol = "$";
+                        break;
+                    }
+                case ("euro"):
+                    {
+                        symbol = "€";
+                        break;
+                    }
+                default:
+                    {
+                        symbol = null;
+                        break;
+                    }                    
+            }
+
+            return symbol;
+        }
+
     }
 }

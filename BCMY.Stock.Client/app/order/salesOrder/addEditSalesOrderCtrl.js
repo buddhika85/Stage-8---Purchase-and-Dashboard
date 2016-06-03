@@ -21,6 +21,7 @@
             vm.httpService = $http;
             vm.title = "Add Sales Order";
             vm.totalValue = "Total : £ 0.00";
+            vm.orderId = -1;
             prepareInitialUI($http, customerSupplierResource, contactResource, currencyResource, vm);        // initial UI
 
             wireCommands(vm, $http, contactResource, customerSupplierResource);
@@ -142,7 +143,8 @@
 
         // on download order report button click
         vm.downloadOrderReport = function () {
-            alert("Download order report - under construction");
+            //alert("Download order report - under construction");
+            downloadOrderReportExcel(vm);
         }
 
         // on confirm order button click
@@ -348,6 +350,7 @@
             if (data != -999) {                
                 // store the returned order Id in the hidden field
                 $('#orderId').val(data);
+                vm.orderId = data;
                 $('#lblErrorMessageCrtOrdr').removeClass("errorLabel");
                 $('#lblErrorMessageCrtOrdr').addClass("successLabel");
                 $('#lblErrorMessageCrtOrdr').text("Order creation successful, Please do a product search and add the order lines");
@@ -1610,6 +1613,29 @@
         ).error(function (data) {
             // display error message
             alert('error - web service access')
+        });
+    }
+
+    // used to download order excel file
+    function downloadOrderReportExcel(vm)
+    {
+        $http({
+            method: "post",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer ' + localStorage["access_token"],
+                'Accept': 'application/vnd.ms-excel'
+            },
+            url: ('http://localhost:61945/api/Orderline?orderIdValForReport' + vm.orderId),
+            responseType: 'arraybuffer'
+        }).success(function (data) {
+            var blob = new Blob([data], { type: "application/vnd.ms-excel" });
+            var objectUrl = URL.createObjectURL(blob);
+            window.open(objectUrl);
+        }
+        ).error(function (data) {
+            debugger
+            // display error message
+            alert('error - web service access - download order report - please contact IT helpdesk');            
         });
     }
 }());

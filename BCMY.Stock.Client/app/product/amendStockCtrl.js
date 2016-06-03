@@ -681,7 +681,7 @@
 
     // used to download excel file
     function downloadExcel(vm) {
-        alert(vm.modelsSelected);
+        //alert(vm.modelsSelected);
         vm.httpService({
             method: "post",
             headers: {
@@ -698,8 +698,7 @@
         ).error(function (data) {
             debugger
             // display error message
-            alert('error - web service access - condition DDL population - please contact IT helpdesk');
-            vm.conditions = [{ conditionId: '-1', conditionName: '---- Select Condition ----' }];
+            alert('error - web service access - product stock info excel download unsuccessful - please contact IT helpdesk');
         });
     }
 

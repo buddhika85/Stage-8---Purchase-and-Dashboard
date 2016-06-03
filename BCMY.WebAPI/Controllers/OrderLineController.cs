@@ -13,6 +13,7 @@ using System.Web.Http.Cors;
 using System.Data;
 using System.Data.SqlClient;
 using DataAccess_EF.ViewModels;
+using System.Net.Http.Headers;
 
 namespace BCMY.WebAPI.Controllers
 {
@@ -94,6 +95,38 @@ namespace BCMY.WebAPI.Controllers
             }
         } 
 
+        // Returns all conditions by categoryIds comma list
+        [HttpPost, ActionName("GenerateOrderlineInfoReport")]
+        public HttpResponseMessage GenerateOrderlineInfoReport(int orderIdValForReport)
+        {
+            try
+            {
+                // call stored procedure via repository
+                var result = orderLineRepository.SQLQuery<OrderLineViewModel>("SP_GetOrderLinesByOrderId @orderIdVal",
+                    new SqlParameter("orderIdVal", SqlDbType.Int) { Value = orderIdValForReport });
+
+                // convert the result orderlines (by order ID)
+                IEnumerable<OrderLineViewModel> orderLinesOfOrder = result.ToList<OrderLineViewModel>();
+
+                // order details
+                var resultOrder = orderLineRepository.SQLQuery<OrderViewModel>("SP_GetOrderVmById @orderId",
+                    new SqlParameter("orderId", SqlDbType.Int) { Value = orderIdValForReport });
+                OrderViewModel orderInfo = resultOrder.SingleOrDefault<OrderViewModel>();
+
+                byte[] temp = System.Text.Encoding.UTF8.GetBytes(new HtmlTableGenerator().GenerateOrderlineInfoHtmlTable(orderLinesOfOrder, orderInfo).ToString());
+
+                HttpResponseMessage resultH = new HttpResponseMessage(HttpStatusCode.OK);
+                resultH.Content = new ByteArrayContent(temp);
+                resultH.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.ms-excel");
+                resultH.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+                resultH.Content.Headers.ContentDisposition.FileName = "orderlines.xlsx";
+                return resultH;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
 
         /// <summary>
         /// Get orderline info by orderline Id
