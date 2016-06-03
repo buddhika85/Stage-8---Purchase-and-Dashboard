@@ -16,7 +16,7 @@
             $("#loggedInUserWithTime").text(localStorage["userName"]);
             vm.exchangeRatesDateJson = null;
             DrawExchangeRatesChart($http);
-            //DrawSalesByCountryChart($http);
+            DrawSalesByCountryChart($http);
             blockUI.stop();
         }
         else {
