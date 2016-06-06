@@ -125,7 +125,8 @@
 
         // on download order report button click
         vm.downloadOrderReport = function () {
-            alert("Download order report - under construction");
+            //alert("Download order report - under construction");
+            downloadOrderReportExcel(vm, $http);
         }
 
         // on confirm order button click
@@ -327,7 +328,8 @@
         .success(function (data) {
             debugger;
             if (! isNaN(data)) {
-                // store the returned order Id in the hidden field
+                // store the returned order Id in the hidden field and view model
+                vm.orderId = parseInt(data);
                 $('#orderId').val(parseInt(data));
                 $('#lblErrorMessageCrtOrdr').removeClass("errorLabel");
                 $('#lblErrorMessageCrtOrdr').addClass("successLabel");
@@ -1585,6 +1587,30 @@
         ).error(function (data) {
             // display error message
             alert('error - web service access')
+        });
+    }
+
+    // used to download order excel file
+    function downloadOrderReportExcel(vm, $http) {
+        debugger
+        $http({
+            method: "post",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer ' + localStorage["access_token"],
+                'Accept': 'application/vnd.ms-excel'
+            },
+            url: ('https://localhost:44302/api/Orderline?orderIdValForReport=' + vm.orderId),
+            responseType: 'arraybuffer'
+        }).success(function (data) {
+            debugger
+            var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+            var objectUrl = URL.createObjectURL(blob);
+            window.open(objectUrl);
+        }
+        ).error(function (data) {
+            debugger
+            // display error message
+            alert('error - web service access - download order report - please contact IT helpdesk');
         });
     }
 }());

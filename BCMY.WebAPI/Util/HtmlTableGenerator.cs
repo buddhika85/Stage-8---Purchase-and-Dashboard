@@ -50,15 +50,13 @@ namespace BCMY.WebAPI.Util
             try
             {
                 sb = new StringBuilder();
+                sb.Append("<table border=`" + "1px" + "`b>");
                 sb.Append("<tr>Order ID - " + orderInfo.id +"</tr>");
                 sb.Append("<tr>Order Status - " + orderInfo.status + "</tr>");
                 sb.Append("<tr>Customer - " + orderInfo.company + "</tr>");
                 sb.Append("<tr>Contact - " + orderInfo.contactFulName + "</tr>");
                 sb.Append("<tr>Order Date - " + orderInfo.orderCreationDate + "</tr>");
-                sb.Append("<tr>Order Total - " + CommonBehaviour.GetCurrencySymbol(orderInfo.currency) + " " + orderInfo.total + "</tr>");
-                sb.Append("<tr>" + "</br>" + "</tr>");
-                sb.Append("<table border=`" + "1px" + "`b>");
-                sb.Append("<tr>");
+                sb.Append("<tr>Order Total - " + CommonBehaviour.GetCurrencySymbol(orderInfo.currency) + " " + orderInfo.total + "</tr>");                
                 sb.Append("<td><b><font face=Arial Narrow size=3>Condition</font></b></td>");
                 sb.Append("<td><b><font face=Arial Narrow size=3>Brand</font></b></td>");
                 sb.Append("<td><b><font face=Arial Narrow size=3>Model</font></b></td>");

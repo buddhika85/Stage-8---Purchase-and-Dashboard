@@ -682,16 +682,30 @@
     // used to download excel file
     function downloadExcel(vm) {
         //alert(vm.modelsSelected);
+        if (typeof vm.modelsSelected == 'undefined')
+        {
+            vm.modelsSelected = "-1";
+        }
+        if (typeof vm.categoriesSelected == 'undefined') {
+            vm.categoriesSelected = "-1";
+        }
+        if (typeof vm.conditionsSelected == 'undefined') {
+            vm.conditionsSelected = "-1";
+        }
+        if (typeof vm.brandsSelected == 'undefined') {
+            vm.brandsSelected = "-1";
+        }
+
         vm.httpService({
             method: "post",
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer ' + localStorage["access_token"],
                 'Accept': 'application/vnd.ms-excel'
             },
-            url: ('https://localhost:44302/api/productinfo/GetConditionsByCategories?modelsCsv=' + vm.modelsSelected),
+            url: ('https://localhost:44302/api/productinfo/GetConditionsByCategories?modelsCsv=' + vm.modelsSelected + '&categoriesCsv=' + vm.categoriesSelected + '&conditionsCsv=' + vm.conditionsSelected + '&brandsCsv=' + vm.brandsSelected),
             responseType: 'arraybuffer'
         }).success(function (data) {
-            var blob = new Blob([data], { type: "application/vnd.ms-excel" });
+            var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
             var objectUrl = URL.createObjectURL(blob);
             window.open(objectUrl);
         }

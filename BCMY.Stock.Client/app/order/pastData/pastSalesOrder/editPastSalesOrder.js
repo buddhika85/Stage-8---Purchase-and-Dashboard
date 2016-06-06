@@ -20,7 +20,8 @@
             vm.totalValue = "Total : £ 0.00";
             var searchObject = $location.search();                                                      // get order Id, that passed as query string
             var salesOrderId = searchObject.orderId;
-            vm.searchObject = searchObject;
+            vm.orderId = searchObject.orderId;
+            vm.searchObject = searchObject;     
 
             vm.title = "Edit Past Sales Order : Id = " + salesOrderId;
 
@@ -131,7 +132,8 @@
 
         // on download order report button click
         vm.downloadOrderReport = function () {
-            alert("Download order report - under construction");
+            //alert("Download order report - under construction");
+            downloadOrderReportExcel(vm, $http);
         }
 
         // on confirm order button click
@@ -1606,6 +1608,30 @@
         ).error(function (data) {
             // display error message
             alert('error - web service access')
+        });
+    }
+
+    // used to download order excel file
+    function downloadOrderReportExcel(vm, $http) {
+        debugger
+        $http({
+            method: "post",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer ' + localStorage["access_token"],
+                'Accept': 'application/vnd.ms-excel'
+            },
+            url: ('https://localhost:44302/api/Orderline?orderIdValForReport=' + vm.orderId),
+            responseType: 'arraybuffer'
+        }).success(function (data) {
+            debugger
+            var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+            var objectUrl = URL.createObjectURL(blob);
+            window.open(objectUrl);
+        }
+        ).error(function (data) {
+            debugger
+            // display error message
+            alert('error - web service access - download order report - please contact IT helpdesk');
         });
     }
 }());

@@ -144,7 +144,7 @@
         // on download order report button click
         vm.downloadOrderReport = function () {
             //alert("Download order report - under construction");
-            downloadOrderReportExcel(vm);
+            downloadOrderReportExcel(vm, $http);
         }
 
         // on confirm order button click
@@ -1617,25 +1617,26 @@
     }
 
     // used to download order excel file
-    function downloadOrderReportExcel(vm)
-    {
+    function downloadOrderReportExcel(vm, $http) {
+        debugger
         $http({
             method: "post",
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer ' + localStorage["access_token"],
                 'Accept': 'application/vnd.ms-excel'
             },
-            url: ('http://localhost:61945/api/Orderline?orderIdValForReport' + vm.orderId),
+            url: ('https://localhost:44302/api/Orderline?orderIdValForReport=' + vm.orderId),
             responseType: 'arraybuffer'
         }).success(function (data) {
-            var blob = new Blob([data], { type: "application/vnd.ms-excel" });
+            debugger
+            var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
             var objectUrl = URL.createObjectURL(blob);
             window.open(objectUrl);
         }
         ).error(function (data) {
             debugger
             // display error message
-            alert('error - web service access - download order report - please contact IT helpdesk');            
+            alert('error - web service access - download order report - please contact IT helpdesk');
         });
     }
 }());

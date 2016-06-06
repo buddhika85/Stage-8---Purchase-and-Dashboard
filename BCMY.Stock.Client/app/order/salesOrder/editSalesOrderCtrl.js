@@ -1684,7 +1684,7 @@
 
     // used to download order excel file
     function downloadOrderReportExcel(vm, $http) {
-        debugger
+        //debugger
         $http({
             method: "post",
             headers: {
@@ -1695,7 +1695,7 @@
             responseType: 'arraybuffer'
         }).success(function (data) {
             debugger
-            var blob = new Blob([data], { type: "application/vnd.ms-excel" });
+            var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
             var objectUrl = URL.createObjectURL(blob);
             window.open(objectUrl);
         }

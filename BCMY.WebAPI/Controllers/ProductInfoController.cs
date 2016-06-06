@@ -224,27 +224,25 @@ namespace BCMY.WebAPI.Controllers
 
         // Returns all conditions by categoryIds comma list
         [HttpPost, ActionName("GenerateStockReports")]
-        public HttpResponseMessage GenerateStockReports(string modelsCsv)
+        public HttpResponseMessage GenerateStockReports(string modelsCsv, string categoriesCsv, string conditionsCsv, string brandsCsv)
         {            
             try
             {
                 // call stored procedure via repository
-                var result = productConditionRepository.SQLQuery<ProductStockInfoViewModel>("SP_GetProductStockInfo @modelsCsv",
-                    new SqlParameter("modelsCsv", SqlDbType.VarChar) { Value = modelsCsv });
+                var result = productConditionRepository.SQLQuery<ProductStockInfoViewModel>("SP_GetProductStockInfo @modelsCsv, @categoriesCsv, @conditionsCsv, @brandsCsv",
+                    new SqlParameter("modelsCsv", SqlDbType.VarChar) { Value = modelsCsv == null || modelsCsv == "-1" ? (object)DBNull.Value : modelsCsv },
+                    new SqlParameter("categoriesCsv", SqlDbType.VarChar) { Value = categoriesCsv == null || categoriesCsv == "-1" ? (object)DBNull.Value : categoriesCsv },
+                    new SqlParameter("conditionsCsv", SqlDbType.VarChar) { Value = conditionsCsv == null || conditionsCsv == "-1" ? (object)DBNull.Value : conditionsCsv },
+                    new SqlParameter("brandsCsv", SqlDbType.VarChar) { Value = brandsCsv == null || brandsCsv == "-1" ? (object)DBNull.Value : brandsCsv });
                 // convert the result to a view model object list
                 IEnumerable<ProductStockInfoViewModel> stockInfoModels = result.ToList<ProductStockInfoViewModel>();
 
-                byte[] temp = System.Text.Encoding.UTF8.GetBytes(new HtmlTableGenerator().GenerateModelStockInfoHtmlTable(stockInfoModels).ToString());
-
-
-                //FileStream stream = File.OpenRead(@"E:\KTP Project\Dropbox\Stage 7 - User login\prodstock.xlsx");
-                //byte[] fileBytes = new byte[stream.Length];
- 
+                string path = new ExcelWriter().GenerateModelStockInfoExcelReport(stockInfoModels);
                 HttpResponseMessage resultH = new HttpResponseMessage(HttpStatusCode.OK);
-                resultH.Content = new ByteArrayContent(temp);
-                resultH.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.ms-excel");
-                resultH.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
-                resultH.Content.Headers.ContentDisposition.FileName = "prodstock.xlsx";
+                var stream = new FileStream(path, FileMode.Open);
+                resultH.Content = new StreamContent(stream);
+                resultH.Content.Headers.ContentType =
+                    new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
                 return resultH;
             }
             catch (Exception)

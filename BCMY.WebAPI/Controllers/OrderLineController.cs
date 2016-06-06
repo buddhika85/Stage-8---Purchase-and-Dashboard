@@ -14,6 +14,7 @@ using System.Data;
 using System.Data.SqlClient;
 using DataAccess_EF.ViewModels;
 using System.Net.Http.Headers;
+using System.IO;
 
 namespace BCMY.WebAPI.Controllers
 {
@@ -113,13 +114,12 @@ namespace BCMY.WebAPI.Controllers
                     new SqlParameter("orderId", SqlDbType.Int) { Value = orderIdValForReport });
                 OrderViewModel orderInfo = resultOrder.SingleOrDefault<OrderViewModel>();
 
-                byte[] temp = System.Text.Encoding.UTF8.GetBytes(new HtmlTableGenerator().GenerateOrderlineInfoHtmlTable(orderLinesOfOrder, orderInfo).ToString());
-
+                string path = new ExcelWriter().GenerateOrderlineInfoExcelReport(orderLinesOfOrder, orderInfo);
                 HttpResponseMessage resultH = new HttpResponseMessage(HttpStatusCode.OK);
-                resultH.Content = new ByteArrayContent(temp);
-                resultH.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.ms-excel");
-                resultH.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
-                resultH.Content.Headers.ContentDisposition.FileName = "orderlines.xlsx";
+                var stream = new FileStream(path, FileMode.Open);
+                resultH.Content = new StreamContent(stream);
+                resultH.Content.Headers.ContentType = 
+                    new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
                 return resultH;
             }
             catch (Exception)
