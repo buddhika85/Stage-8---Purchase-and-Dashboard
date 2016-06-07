@@ -131,7 +131,7 @@
                         { "mData": "type", "sTitle": "Type"},
                         { "mData": "status", "sTitle": "Status" },
                         {
-                            "mData": "currency", "sTitle": "Currency", "sClass": "right", "mRender": function (data, type, row) {
+                            "mData": "currency", "sTitle": "£/$/€", "sClass": "right", "mRender": function (data, type, row) {
                                 if (data != null) {
                                     return getCurrencyHtmlEntityValue(data);
                                 }
@@ -158,7 +158,7 @@
                         { "mData": "company", "sTitle": "Customer/Supplier" },
                         { "mData": "contactFulName", "sTitle": "Contact" },
                         { "mData": "orderCreationDate", "sTitle": "Date"},
-                        { "mData": "orderCreationTime", "sTitle": "Time" },
+                        { "mData": "orderCreationTime", "sTitle": "Time", "bVisible": false },
                         {
                             "mData": "pastOrder", "sTitle": "Past order", "mRender": function (data, type, row) {
                                 if (data != null && data == 'yes') {
@@ -173,7 +173,7 @@
 
                         //{ "sTitle": "Edit Order", "defaultContent": "<button class='orderSearchEdit'><span class='glyphicon glyphicon-edit'></span></button>" },
                         {
-                            "sTitle": "Edit Order", "mRender": function (data, type, row) {
+                            "sTitle": "View and Edit", "mRender": function (data, type, row) {
                                 if ($.trim(localStorage["userRolesList"]).indexOf('director') > -1 ||
                                         $.trim(localStorage["userRolesList"]).indexOf('management-sales') > -1 ||
                                         $.trim(localStorage["userRolesList"]).indexOf('executive-sales') > -1 ||
@@ -226,9 +226,14 @@
 
     // on delete button click
     function onOrderDeleteBtnClick(dataRow, $http, row, vm, $location, $rootScope) {
-        
+        debugger
+        var message = "Are you sure that you want to delete order " + dataRow.id + " by " + dataRow.contactFulName + " of " + dataRow.company + " ?";
+        if (dataRow.pastOrder != 'yes') {
+            message = "Are you sure that you want to delete order " + dataRow.id + " by " + dataRow.contactFulName + " of " + dataRow.company + " ? </br ></br ><kbd>IMPORTANT:</kbd></br ><i>once deleted the ordered item quantity will be added back into stock, if you do not want this to happen please record the quantities first and then manually edit the stock count down via the Amend stock feature</i>"
+        }
+
         bootbox.dialog({
-            message: "Are you sure that you want to delete order " + dataRow.id + " by " + dataRow.contactFulName + " of " + dataRow.company + " ?",
+            message: message,
             title: "Confirm Order Deletion",
             buttons: {
                 danger: {

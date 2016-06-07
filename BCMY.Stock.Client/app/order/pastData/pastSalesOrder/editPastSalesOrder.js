@@ -420,7 +420,7 @@
     }
 
     // on product category ddl is changed
-    function onCategorySelection($http, ddl) {
+    function onCategorySelection($http, ddl, vm) {
         //alert('category changed : ' + ddl.val());
         var selectedCategory = ddl.val();
         var listitems = '<option value=-1 selected="selected">---- Select Condition ----</option>';
@@ -460,7 +460,7 @@
     }
 
     // on product condition ddl is changed
-    function onConditionSelection($http, ddl) {
+    function onConditionSelection($http, ddl, vm) {
         //alert('condition changed');
         var selectedCondition = ddl.val();
         var selectedCategory = $('#selectCategory').val();
@@ -496,7 +496,7 @@
     }
 
     // on product brand ddl is changed
-    function onBrandSelection($http, ddl) {
+    function onBrandSelection($http, ddl, vm) {
         var selectedCategory = $('#selectCategory').val();
         var selectedCondition = $("#selectCondition").val();
         var selectedBrands = ddl.val();
@@ -715,7 +715,7 @@
     }
 
     // used to create the product search result data grid
-    function DrawGrid(searchResult, $http) {
+    function DrawGrid(searchResult, $http, vm) {
         if (searchResult != null) {
             //alert("Grid creation : " + searchResult.length);
             // basic grid creation, data population
@@ -746,7 +746,7 @@
             $('#productsGrid tbody').on('click', 'button.productInfo', function () {
                 var data = table.row($(this).parents('tr')).data();
                 //alert("View Info : " + data.productlistId + " - " + data.model);
-                OnProductInfoBtnClick(data, $http);
+                OnProductInfoBtnClick(data, $http, vm);
             });
         }
         else {
@@ -757,7 +757,7 @@
     }
 
     // on product information button click on the grid rows
-    function OnProductInfoBtnClick(prodFrmGrid, $http) {
+    function OnProductInfoBtnClick(prodFrmGrid, $http, vm) {
         // clean error messages
         RemoveOutlineBordersNegForm();
 
@@ -783,7 +783,7 @@
                 marketValueSpecificCurr = GetMarketValueFromSpecificCurrency(selectedCurrency, data);
                 stockCount = data.stockCount;
 
-                DisplayNegotiationPopup($http, productListId, category, condition, brand, model, marketValueGBP, marketValueSpecificCurr, stockCount, selectedCurrency);
+                DisplayNegotiationPopup($http, productListId, category, condition, brand, model, marketValueGBP, marketValueSpecificCurr, stockCount, selectedCurrency, vm);
             }
             else {
                 alert('error - web service access - cound not find a product with Id - ' + productListId + ' - please contact IT helpdesk');
@@ -820,7 +820,7 @@
     }
 
     // used to display the product negotiation popup
-    function DisplayNegotiationPopup($http, productListId, category, condition, brand, model, marketValueGBP, marketValueSpecificCurr, stockCount, selectedCurrency) {
+    function DisplayNegotiationPopup($http, productListId, category, condition, brand, model, marketValueGBP, marketValueSpecificCurr, stockCount, selectedCurrency, vm) {
         // populate the popup
         $('#productListId').val(productListId);
         $('#lblCetegory').text(category);
@@ -1256,7 +1256,7 @@
     function OnOrderLineRejectBtnClick(row, dataRow, $http, vm) {
         bootbox.dialog({
             message: "Are you sure that you want to reject orderline " + dataRow.id + " of " + dataRow.orderId + " ?",
-            title: "Confirm Order Deletion",
+            title: "Confirm Orderline Deletion",
             buttons: {
                 danger: {
                     label: "No",
@@ -1280,7 +1280,7 @@
     function OnOrderLineDeleteBtnClick(row, dataRow, $http, vm) {
         bootbox.dialog({
             message: "Are you sure that you want to delete orderline " + dataRow.id + " of " + dataRow.orderId + " ?",
-            title: "Confirm Order Deletion",
+            title: "Confirm Orderline Deletion",
             buttons: {
                 danger: {
                     label: "No",
@@ -1429,7 +1429,7 @@
     }
 
     // searching product info
-    function SearchProducts($http) {
+    function SearchProducts($http, vm) {
         // get search criterias
         var categoryDdl = $('#selectCategory');
         var searchResult = null;
@@ -1445,7 +1445,7 @@
             modelIds = $('#selectModel').val();
 
             // search and display
-            RetriveSearchProductsDrawGrid($http, categoryId, conditionId, brandIds, modelIds);
+            RetriveSearchProductsDrawGrid($http, categoryId, conditionId, brandIds, modelIds, vm);
         }
         else {
             DisplayErrorMessage('Error : Your should atleast select a category perform a product search', $('#lblErrorMessage'));
@@ -1454,7 +1454,7 @@
     }
 
     // used to search and return the results in the DB
-    function RetriveSearchProductsDrawGrid($http, categoryId, conditionId, brandIds, modelIds) {
+    function RetriveSearchProductsDrawGrid($http, categoryId, conditionId, brandIds, modelIds, vm) {
         //var searchParams = getSearchParamsJsonObject(categoryId, conditionId, brandIds, modelIds);       // creation of the json object
         //var jsonStr = JSON.stringify(searchParams);                                                       // covert to json string to pass to web service
         var searchResult = '';
@@ -1466,7 +1466,7 @@
             url: serverUrl
         }).success(function (data) {
             //alert('search result length : ' + data.length); 
-            DrawGrid(data, $http);
+            DrawGrid(data, $http, vm);
         }
         ).error(function (data) {
             // display error message

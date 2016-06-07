@@ -1310,7 +1310,7 @@
     function OnOrderLineRejectBtnClick(row, dataRow, $http, vm) {
         bootbox.dialog({
             message: "Are you sure that you want to reject orderline " + dataRow.id + " of " + dataRow.orderId + " ?",
-            title: "Confirm Order Deletion",
+            title: "Confirm Orderline Deletion",
             buttons: {
                 danger: {
                     label: "No",
@@ -1334,8 +1334,8 @@
     // delete orderline
     function OnOrderLineDeleteBtnClick(row, dataRow, $http, vm) {
         bootbox.dialog({
-            message: "Are you sure that you want to delete orderline " + dataRow.id + " of " + dataRow.orderId + " ?",
-            title: "Confirm Order Deletion",
+            message: "Are you sure that you want to delete orderline " + dataRow.id + " of " + dataRow.orderId + " ? </br ></br ><kbd>IMPORTANT:</kbd></br ><i>once deleted the ordered item quantity will be added back into stock, if you do not want this to happen please record the quantities first and then manually edit the stock count down via the Amend stock feature</i>",
+            title: "Confirm Orderline Deletion",
             buttons: {
                 danger: {
                     label: "No",

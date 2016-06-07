@@ -1234,7 +1234,7 @@
     function OnOrderLineRejectBtnClick(row, dataRow, $http, vm) {
         bootbox.dialog({
             message: "Are you sure that you want to reject orderline " + dataRow.id + " of " + dataRow.orderId + " ?",
-            title: "Confirm Order Deletion",
+            title: "Confirm Orderline Deletion",
             buttons: {
                 danger: {
                     label: "No",
@@ -1258,7 +1258,7 @@
     function OnOrderLineDeleteBtnClick(row, dataRow, $http, vm) {
         bootbox.dialog({
             message: "Are you sure that you want to delete orderline " + dataRow.id + " of " + dataRow.orderId + " ?",
-            title: "Confirm Order Deletion",
+            title: "Confirm Orderline Deletion",
             buttons: {
                 danger: {
                     label: "No",
