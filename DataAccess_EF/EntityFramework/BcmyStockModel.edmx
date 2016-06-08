@@ -209,6 +209,17 @@
           <Property Name="lastAmendedDate" Type="datetime" />
           <Property Name="lastIncrementDate" Type="datetime" />
         </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="TblStockUnavailableReasons">
+          <Key>
+            <PropertyRef Name="reasonId" />
+            <PropertyRef Name="reasonName" />
+          </Key>
+          <Property Name="reasonId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="reasonName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="reasonDescription" Type="varchar(max)" />
+        </EntityType>
         <Association Name="FK__TblContac__custo__719CDDE7">
           <End Role="TblCustomerSupplier" Type="Self.TblCustomerSupplier" Multiplicity="0..1" />
           <End Role="TblContact" Type="Self.TblContact" Multiplicity="*" />
@@ -325,6 +336,16 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Function Name="CSVToTable" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="InStr" Type="varchar(max)" Mode="In" />
+          <ReturnType>
+            <CollectionType>
+              <RowType>
+                <Property Name="id" Type="int" Nullable="false" />
+              </RowType>
+            </CollectionType>
+          </ReturnType>
+        </Function>
         <Function Name="Func_CompareDateTimeWithDatePart" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" ReturnType="bit">
           <Parameter Name="dateOne" Type="datetime" Mode="In" />
           <Parameter Name="dateTwo" Type="datetime" Mode="In" />
@@ -380,6 +401,9 @@
         <Function Name="SP_GetAllCustomerSuppliers" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <Function Name="SP_GetAllOrderViewModels" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <Function Name="SP_GetChartsExchangeRatesDeviation" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="SP_GetChartsSalesPurchasesCountryDeviation" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="orderType" Type="varchar" Mode="In" />
+        </Function>
         <Function Name="SP_GetContactInfo" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="contactId" Type="int" Mode="In" />
         </Function>
@@ -508,6 +532,13 @@
           <EntitySet Name="TblOrder" EntityType="Self.TblOrder" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TblOrderLine" EntityType="Self.TblOrderLine" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TblProductStock" EntityType="Self.TblProductStock" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TblStockUnavailableReasons" EntityType="Self.TblStockUnavailableReasons" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [TblStockUnavailableReasons].[reasonId] AS [reasonId], 
+    [TblStockUnavailableReasons].[reasonName] AS [reasonName], 
+    [TblStockUnavailableReasons].[reasonDescription] AS [reasonDescription]
+    FROM [dbo].[TblStockUnavailableReasons] AS [TblStockUnavailableReasons]</DefiningQuery>
+          </EntitySet>
           <AssociationSet Name="FK__TblContac__custo__719CDDE7" Association="Self.FK__TblContac__custo__719CDDE7">
             <End Role="TblCustomerSupplier" EntitySet="TblCustomerSupplier" />
             <End Role="TblContact" EntitySet="TblContact" />
@@ -765,7 +796,7 @@
             <Parameter Name="orderDate" Mode="In" Type="DateTime" />
           </FunctionImport>
           <FunctionImport Name="SP_DeleteOrder">
-            <Parameter Name="orderId" Mode="In" Type="Int32" />
+          <Parameter Name="orderId" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="SP_DeleteOrRejectOrderline" ReturnType="Collection(String)">
             <Parameter Name="deleteOrReject" Mode="In" Type="String" />
@@ -813,6 +844,13 @@
           <FunctionImport Name="SplitStringsByDelimiter" IsComposable="true" ReturnType="Collection(String)">
             <Parameter Name="List" Mode="In" Type="String" />
             <Parameter Name="Delimiter" Mode="In" Type="String" />
+          </FunctionImport>
+          <EntitySet Name="TblStockUnavailableReasons" EntityType="BCMY_StockModel.TblStockUnavailableReason" />
+          <FunctionImport Name="CSVToTable" IsComposable="true" ReturnType="Collection(Int32)">
+            <Parameter Name="InStr" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="SP_GetChartsSalesPurchasesCountryDeviation" ReturnType="Collection(BCMY_StockModel.SP_GetChartsSalesPurchasesCountryDeviation_Result)">
+            <Parameter Name="orderType" Mode="In" Type="String" />
           </FunctionImport>
           </EntityContainer>
         <ComplexType Name="SP_GetAllOrderViewModels_Result">
@@ -1326,6 +1364,19 @@
           <Property Type="Int32" Name="conditionId" Nullable="true" />
           <Property Type="String" Name="condition" Nullable="false" MaxLength="100" />
           <Property Type="String" Name="model" Nullable="false" MaxLength="150" />
+        </ComplexType>
+        <EntityType Name="TblStockUnavailableReason">
+          <Key>
+            <PropertyRef Name="reasonId" />
+            <PropertyRef Name="reasonName" />
+          </Key>
+          <Property Name="reasonId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="reasonName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="reasonDescription" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <ComplexType Name="SP_GetChartsSalesPurchasesCountryDeviation_Result">
+          <Property Type="String" Name="country" Nullable="false" MaxLength="100" />
+          <Property Type="Decimal" Name="TotalValue" Nullable="true" Precision="38" Scale="5" />
         </ComplexType>
         </Schema>
     </edmx:ConceptualModels>
@@ -1923,6 +1974,24 @@
           <FunctionImportMapping FunctionImportName="SP_TransferConfirmedOLinesToNegotisTbl" FunctionName="BCMY_StockModel.Store.SP_TransferConfirmedOLinesToNegotisTbl" />
           <FunctionImportMapping FunctionImportName="SP_UpdateStockCount" FunctionName="BCMY_StockModel.Store.SP_UpdateStockCount" />
           <FunctionImportMapping FunctionImportName="SplitStringsByDelimiter" FunctionName="BCMY_StockModel.Store.SplitStringsByDelimiter" />
+          <EntitySetMapping Name="TblStockUnavailableReasons">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblStockUnavailableReason">
+              <MappingFragment StoreEntitySet="TblStockUnavailableReasons">
+                <ScalarProperty Name="reasonDescription" ColumnName="reasonDescription" />
+                <ScalarProperty Name="reasonName" ColumnName="reasonName" />
+                <ScalarProperty Name="reasonId" ColumnName="reasonId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="CSVToTable" FunctionName="BCMY_StockModel.Store.CSVToTable" />
+          <FunctionImportMapping FunctionImportName="SP_GetChartsSalesPurchasesCountryDeviation" FunctionName="BCMY_StockModel.Store.SP_GetChartsSalesPurchasesCountryDeviation">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="BCMY_StockModel.SP_GetChartsSalesPurchasesCountryDeviation_Result">
+                <ScalarProperty Name="country" ColumnName="country" />
+                <ScalarProperty Name="TotalValue" ColumnName="TotalValue" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

@@ -41,6 +41,7 @@ namespace DataAccess_EF.EntityFramework
         public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; }
         public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; }
         public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
+        public virtual DbSet<TblStockUnavailableReason> TblStockUnavailableReasons { get; set; }
     
         public virtual ObjectResult<string> SP_ConfirmOrder(Nullable<int> orderId)
         {
@@ -540,6 +541,25 @@ namespace DataAccess_EF.EntityFramework
                 new ObjectParameter("Delimiter", typeof(string));
     
             return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<string>("[BCMY_StockEntities].[SplitStringsByDelimiter](@List, @Delimiter)", listParameter, delimiterParameter);
+        }
+    
+        [DbFunction("BCMY_StockEntities", "CSVToTable")]
+        public virtual IQueryable<Nullable<int>> CSVToTable(string inStr)
+        {
+            var inStrParameter = inStr != null ?
+                new ObjectParameter("InStr", inStr) :
+                new ObjectParameter("InStr", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<Nullable<int>>("[BCMY_StockEntities].[CSVToTable](@InStr)", inStrParameter);
+        }
+    
+        public virtual ObjectResult<SP_GetChartsSalesPurchasesCountryDeviation_Result> SP_GetChartsSalesPurchasesCountryDeviation(string orderType)
+        {
+            var orderTypeParameter = orderType != null ?
+                new ObjectParameter("orderType", orderType) :
+                new ObjectParameter("orderType", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<SP_GetChartsSalesPurchasesCountryDeviation_Result>("SP_GetChartsSalesPurchasesCountryDeviation", orderTypeParameter);
         }
     }
 }

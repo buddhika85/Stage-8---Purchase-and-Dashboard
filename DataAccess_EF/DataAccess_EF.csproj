@@ -122,6 +122,9 @@
     <Compile Include="EntityFramework\SP_GetChartsExchangeRatesDeviation_Result.cs">
       <DependentUpon>BcmyStockModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="EntityFramework\SP_GetChartsSalesPurchasesCountryDeviation_Result.cs">
+      <DependentUpon>BcmyStockModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="EntityFramework\SP_GetContactsByCustomerSupplierId_Result.cs">
       <DependentUpon>BcmyStockModel.tt</DependentUpon>
     </Compile>
@@ -192,6 +195,9 @@
       <DependentUpon>BcmyStockModel.tt</DependentUpon>
     </Compile>
     <Compile Include="EntityFramework\TblProductStock.cs">
+      <DependentUpon>BcmyStockModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EntityFramework\TblStockUnavailableReason.cs">
       <DependentUpon>BcmyStockModel.tt</DependentUpon>
     </Compile>
     <Compile Include="EntityFramework\vProductInfo.cs">

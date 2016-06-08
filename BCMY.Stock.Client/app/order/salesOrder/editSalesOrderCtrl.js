@@ -5,10 +5,10 @@
     var module = angular.module("stockManagement");
 
     module.controller("EditSalesOrderCtrl",
-        ["$http", "contactResource", "blockUI", "customerSupplierResource", '$location', 'currencyResource', "loginValidatorService", editSalesOrderCtrl]);
+        ["$http", "$scope", "contactResource", "blockUI", "customerSupplierResource", '$location', 'currencyResource', "loginValidatorService", editSalesOrderCtrl]);
 
     // controller
-    function editSalesOrderCtrl($http, contactResource, blockUI, customerSupplierResource, $location, currencyResource, loginValidatorService)
+    function editSalesOrderCtrl($http, $scope, contactResource, blockUI, customerSupplierResource, $location, currencyResource, loginValidatorService)
     {
         var vm = this;
         if (loginValidatorService.loginValidator()) {
@@ -19,6 +19,7 @@
             var salesOrderId = searchObject.orderId;
             vm.orderId = salesOrderId;
             vm.title = "Edit Sales Order : Id = " + salesOrderId;
+            vm.scope = $scope;
             vm.messageHeadersForEnc = {
                 'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer ' + localStorage["access_token"]
             };
@@ -1269,6 +1270,17 @@
                         { "sTitle": "Edit Info", "defaultContent": "<button class='businessEdit'><span class='glyphicon glyphicon-edit'/></button>" },
                         { "sTitle": "Reject", "defaultContent": "<button class='businessReject'><span class='glyphicon glyphicon-ban-circle'/></button>" },
                         { "sTitle": "Delete", "defaultContent": "<button class='businessDelete'><span class='glyphicon glyphicon-remove'/></button>" },
+                        {
+                            "mData": "status", "sTitle": "Stock Error", "mRender": function (data, type, row) {
+                                if (data == 'confirmed') {
+                                    return "<button class='orderlineDiscrepancy'><span class='glyphicon glyphicon-wrench'/></button>";
+                                }
+                                else {
+                                    return "<button class='orderlineDiscrepancy' disabled><span class='glyphicon glyphicon-wrench'/></button>";
+                                }
+                            },
+                            "aTargets": [0]
+                        },
                 ],
                 "bDestroy": true,
                 "aLengthMenu": [[25, 50, 100, 200, -1], [25, 50, 100, 200, "All"]],
@@ -1298,12 +1310,54 @@
                 //alert("View Info : " + data.productlistId + " - " + data.model);
                 OnOrderLineDeleteBtnClick(row, dataRow, $http, vm);
             });
+            // on orderline discrepancy button clicks
+            $('#orderGrid tbody').on('click', 'button.orderlineDiscrepancy', function () {
+                var row = $(this).parents('tr');
+                var dataRow = table.row($(this).parents('tr')).data();
+                //alert("Dis : " + dataRow.productId + " - " + dataRow.model);
+                OnOrderlineDiscrepancyBtnClick(row, dataRow, $http, vm);
+            });
         }
         //else {
         //    DisplayErrorMessage('Error : No products in the specified search criteria', $('#lblErrorOrderLineMessage'));
         //    alert('Error : No products in the specified search criteria');
         //}
 
+    }
+
+    // oredrline discrepancies
+    function OnOrderlineDiscrepancyBtnClick(row, dataRow, $http, vm)
+    {
+        debugger
+        var orderId = vm.orderId;
+        var orderLineId = dataRow.id;
+        //alert("Dis : " + dataRow.productId + " - " + dataRow.model);
+
+        vm.productListId = 'd';
+        vm.productModel = 'd';
+        vm.customerSupllier = 'd';
+        vm.contact = 'd';
+        vm.orderId = 'd';
+        vm.prevQty = 'd';
+        vm.prePPI = 'd';
+        vm.prevTotal = 'd';
+        vm.difference = 'd';
+        vm.reasonForDifference = 'd';
+        vm.newQty = 'd';
+        vm.newPrice = 'd';
+        vm.newTotal = 'd';
+        vm.newStatus = 'd';
+        vm.freeStock = 'd';
+        vm.errorDf = 'd';
+        vm.scope.$evalAsync();
+
+        // modelOrderlineUnavailabilities
+        // show the popup with populated data        
+        $('#modelOrderlineUnavailabilities').modal({
+            show: true,
+            keyboard: true,
+            backdrop: true
+        });
     }
 
     // reject orderline

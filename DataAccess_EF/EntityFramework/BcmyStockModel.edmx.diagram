@@ -27,6 +27,7 @@
         <AssociationConnector Association="BCMY_StockModel.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" />
         <AssociationConnector Association="BCMY_StockModel.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" />
         <AssociationConnector Association="BCMY_StockModel.AspNetUserRoles" />
+        <EntityTypeShape EntityType="BCMY_StockModel.TblStockUnavailableReason" Width="1.5" PointX="3.375" PointY="11.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
