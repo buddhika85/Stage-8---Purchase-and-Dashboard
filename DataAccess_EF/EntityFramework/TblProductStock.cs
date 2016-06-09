@@ -14,10 +14,17 @@ namespace DataAccess_EF.EntityFramework
     
     public partial class TblProductStock
     {
+        public TblProductStock()
+        {
+            this.TblConfirmedOrderlineChanges = new HashSet<TblConfirmedOrderlineChange>();
+        }
+    
         public int productId { get; set; }
         public int quantity { get; set; }
         public string stockCountAmended { get; set; }
         public Nullable<System.DateTime> lastAmendedDate { get; set; }
         public Nullable<System.DateTime> lastIncrementDate { get; set; }
+    
+        public virtual ICollection<TblConfirmedOrderlineChange> TblConfirmedOrderlineChanges { get; set; }
     }
 }

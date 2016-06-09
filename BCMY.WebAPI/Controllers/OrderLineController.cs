@@ -70,7 +70,7 @@ namespace BCMY.WebAPI.Controllers
             {
                 return null;
             }
-        }
+        }        
 
         /// <summary>
         /// Gets all the orderlines of an order by an orderId
@@ -151,6 +151,23 @@ namespace BCMY.WebAPI.Controllers
             {
                 return null;
             }
+        }
+
+        // returns orderline and oredr info by orderline Id
+        public OrderlineAndOrderInfoViewModel GetOrderlineAndOrderInfo(int orderlineIdForDf)
+        {
+            OrderlineAndOrderInfoViewModel orderlineOrderInfoVm = null;
+            try
+            {
+                var result = orderLineRepository.SQLQuery<OrderlineAndOrderInfoViewModel>("SP_GetOrderlineAndOrderDetails @orderlineId",
+                    new SqlParameter("orderlineId", SqlDbType.Int) { Value = orderlineIdForDf });
+                orderlineOrderInfoVm = result.SingleOrDefault<OrderlineAndOrderInfoViewModel>();
+            }
+            catch (Exception ex)
+            {
+                orderlineOrderInfoVm = null;
+            }
+            return orderlineOrderInfoVm;
         }
 
         /// <summary>

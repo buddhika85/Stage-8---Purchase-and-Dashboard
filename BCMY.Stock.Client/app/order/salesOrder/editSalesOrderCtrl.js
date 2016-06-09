@@ -158,11 +158,15 @@
         vm.performBacthOrderlineConfirm = function () {
             performBacthOrderlineConfirm($location, $http, vm);
         };
+
+        vm.recordDiscrepancy = function () {
+            recordConfirmedOrderlineChange($http, vm);
+        };
     }
 
     // authorise button access based on user roles
     function authoriseEditSaledOrders(vm) {
-        debugger
+        //debugger
         if ($.trim(localStorage["userRolesList"]).indexOf('director') > -1 ||
             $.trim(localStorage["userRolesList"]).indexOf('management-sales') > -1 ||
             $.trim(localStorage["userRolesList"]).indexOf('executive-sales') > -1 ||
@@ -246,7 +250,7 @@
         // check for row count in the table - header raw and empty raw makes 2
         if ($('#orderGrid tr:eq(1) > td:eq(0)').text() != 'No data available in table') //if ($('#orderGrid tr').length > 2)
         {
-            //debugger
+            ////debugger
             // check for orderline statuses - if all confimed - pass to server side
             var allConfimed = ValidateForOrderLineStatus();
             if (!allConfimed) {
@@ -300,7 +304,7 @@
     
     // check for orderline statuses - if all confimed - return true
     function ValidateForOrderLineStatus() {
-        //debugger
+        ////debugger
         var allConfimed = true;
 
         // get orderline data table
@@ -316,7 +320,7 @@
 
     // used to calculate and display the total income on quantity or price offered inputs changed
     function calculateTotalIncome() {
-        //debugger
+        ////debugger
         $('#totalIncomeLbl').html("Total Value (" +
            getCurrencyHtmlEntityValue($('#selectCurrency option:selected').text().toUpperCase()) + ") = ");
         try
@@ -670,6 +674,22 @@
 
         // show order details panels buttons
         HideOrderDetailsBtns(false);
+
+        $http({
+            method: "get",
+            headers: vm.messageHeadersForEnc,
+            url: ('https://localhost:44302/api/Discrepancy'),
+        }).success(function (data) {
+            debugger
+            vm.unavailableReason = data;
+            vm.unavailableReason.unshift({ reasonId: '-1', reasonName: '---- Select Reason ----' });
+        }
+        ).error(function (data) {
+            // display error message
+            alert('error - web service access')
+        });
+        
+
 
         // populate order details, orderlines details        
         //PopulateOrderDetails($http, vm);
@@ -1267,7 +1287,18 @@
                         { "mData": "time", "sTitle": "Time", "bVisible": false },
                         { "mData": "orderId", "sTitle": "Order Id", "bVisible": false },
 
-                        { "sTitle": "Edit Info", "defaultContent": "<button class='businessEdit'><span class='glyphicon glyphicon-edit'/></button>" },
+                        //{ "sTitle": "Edit Info", "defaultContent": "<button class='businessEdit'><span class='glyphicon glyphicon-edit'/></button>" },
+                        {
+                            "mData": "status", "sTitle": "Edit Info", "mRender": function (data, type, row) {
+                                if (data == 'confirmed') {
+                                    return "<button class='businessEdit' disabled><span class='glyphicon glyphicon-edit'/></button>";
+                                }
+                                else {
+                                    return "<button class='businessEdit'><span class='glyphicon glyphicon-edit'/></button>";
+                                }
+                            },
+                            "aTargets": [0]
+                        },
                         { "sTitle": "Reject", "defaultContent": "<button class='businessReject'><span class='glyphicon glyphicon-ban-circle'/></button>" },
                         { "sTitle": "Delete", "defaultContent": "<button class='businessDelete'><span class='glyphicon glyphicon-remove'/></button>" },
                         {
@@ -1333,23 +1364,51 @@
         var orderLineId = dataRow.id;
         //alert("Dis : " + dataRow.productId + " - " + dataRow.model);
 
-        vm.productListId = 'd';
-        vm.productModel = 'd';
-        vm.customerSupllier = 'd';
-        vm.contact = 'd';
-        vm.orderId = 'd';
-        vm.prevQty = 'd';
-        vm.prePPI = 'd';
-        vm.prevTotal = 'd';
-        vm.difference = 'd';
-        vm.reasonForDifference = 'd';
-        vm.newQty = 'd';
-        vm.newPrice = 'd';
-        vm.newTotal = 'd';
-        vm.newStatus = 'd';
-        vm.freeStock = 'd';
-        vm.errorDf = 'd';
-        vm.scope.$evalAsync();
+        var orderId = $('#orderId').val();
+
+        var serverUrl = 'https://localhost:44302/api/Orderline?orderlineIdForDf=' + orderLineId;
+        $http({
+            method: "get",
+            headers: vm.messageHeadersForEnc,
+            url: serverUrl
+        }).success(function (data) {
+
+            if (data != null) {
+                vm.orderlineId = dataRow.id;
+                vm.productListId = data.productListId;
+                vm.productModel = data.model;
+                vm.availableStock = data.availableStock;
+                vm.marketValueInGBP = data.marketValueInGBP;
+                vm.currency = data.currency;
+                vm.marketValueInSpecificCurrencyDf = data.marketValueInSpecificCurrencyForToday;
+                vm.customerId = data.customerId;
+                vm.customerSupllier = data.customer;
+                vm.contactId = data.contactId;
+                vm.contact = data.contactFulName;
+                vm.orderId = data.orderId;
+                vm.prevQty = data.quantity;
+                vm.prePPI = data.negotiatedPricePerItem;
+                vm.prevTotal = data.total;
+                vm.difference = '0';
+                vm.reasonForDifference = '-1';
+                vm.newQty = '0';
+                vm.newPrice = '0.0';
+                vm.newTotal = '0.0';
+                vm.newStatus = 'in negotiation';
+                vm.stockUpdateOption = 'Add to Stock';
+                vm.updateStocCountkDf = '0'
+                vm.errorDf = '';
+                vm.scope.$evalAsync();
+            }
+            else {                
+                alert('error - web service access to get orderline and order info');
+                vm.errorDf = 'error - web service access to get orderline and order info';
+            }
+        }
+        ).error(function (data) {            
+            DisplayErrorMessage('error - web service access to get orderline and order info');
+            vm.errorDf = 'error - web service access to get orderline and order info';            
+        });
 
         // modelOrderlineUnavailabilities
         // show the popup with populated data        
@@ -1357,6 +1416,32 @@
             show: true,
             keyboard: true,
             backdrop: true
+        });
+    }
+
+    function recordConfirmedOrderlineChange($http, vm) {
+        alert('addDiscrepancyOlineNegotiation');
+        var serverUrl = 'https://localhost:44302/api/Discrepancy?productListId=' + vm.productListId + '&availableStock=' + vm.availableStock +
+            '&status=' + vm.newStatus + '&orderIdVal=' + vm.orderId + '&orderlineId=' + vm.orderlineId +
+            '&model=' + vm.productModel + '&customerId=' + vm.customerId + '&customerName=' + vm.customerSupllier +
+            '&conatctId=' + vm.contactId + '&contactFullName=' + vm.contact +
+            '&promisedQuantity=' + vm.prevQty + '&promisedPricePerItem=' + vm.prePPI + '&promisedTotal=' + vm.prevTotal + '&newQuantity=' + vm.newQty +
+            '&newPricePerItem=' + vm.newPrice + '&newTotal=' + vm.newTotal + '&updateStockStatus=' + vm.stockUpdateOption + '&updateCount=' + vm.updateStocCountkDf + '&userRecorded=' + localStorage["userName"];
+        $http({
+            method: "post",
+            headers: vm.messageHeadersForEnc,
+            url: serverUrl
+        }).success(function (data) {
+            if (data != null)
+            {                
+                //alert(data.length);
+                DrawOrderlineGrid(data, $http, vm);
+                $('#modelOrderlineUnavailabilities').modal('hide');
+            }
+        }
+        ).error(function (data) {
+            DisplayErrorMessage('error - web service access to save change to confimed orderline');
+            vm.errorDf = 'error - web service access to save change to confimed orderline';
         });
     }
 
@@ -1377,7 +1462,7 @@
                     label: "Yes",
                     className: "btn-primary",
                     callback: function () {
-                        debugger
+                        //debugger
                         DeleteRejectOrderline($http, 'rej', dataRow.id, dataRow.orderId, row, vm);
                     }
                 }
@@ -1402,7 +1487,7 @@
                     label: "Yes",
                     className: "btn-primary",
                     callback: function () {
-                        debugger
+                        //debugger
                         DeleteRejectOrderline($http, 'del', dataRow.id, dataRow.orderId, row, vm);
                     }
                 }
@@ -1419,7 +1504,7 @@
             headers: vm.messageHeadersForEnc,
             url: serverUrl
         }).success(function (data) {
-            debugger;
+            //debugger;
             if (data.indexOf('success') > -1)
             {
                 // remove orderline from the grid
@@ -1630,7 +1715,7 @@
     
     // used to populate the product category drop down menu
     function populateCategoryDropDown($http, vm) {
-        debugger
+        //debugger
         $http({
             method: "get",
             headers: vm.messageHeadersForEnc,
@@ -1662,7 +1747,7 @@
     function populateVatandCurrency(orderVm) {
 
         $('#selectCurrency').val(orderVm.currencyId);
-        //debugger
+        ////debugger
         $('#selectVAT').val(orderVm.vat);
 
         $('#totalIncomeLbl').html("Total Value (" +
@@ -1738,7 +1823,7 @@
 
     // used to download order excel file
     function downloadOrderReportExcel(vm, $http) {
-        //debugger
+        ////debugger
         $http({
             method: "post",
             headers: {
@@ -1748,13 +1833,13 @@
             url: ('https://localhost:44302/api/Orderline?orderIdValForReport=' + vm.orderId),
             responseType: 'arraybuffer'
         }).success(function (data) {
-            debugger
+            //debugger
             var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
             var objectUrl = URL.createObjectURL(blob);
             window.open(objectUrl);
         }
         ).error(function (data) {
-            debugger
+            //debugger
             // display error message
             alert('error - web service access - download order report - please contact IT helpdesk');
         });

@@ -239,6 +239,7 @@
     <Compile Include="Controllers\ContactController.cs" />
     <Compile Include="Controllers\CurrencyController.cs" />
     <Compile Include="Controllers\CustomerSupplierController.cs" />
+    <Compile Include="Controllers\DiscrepancyController.cs" />
     <Compile Include="Controllers\ExchangeRateController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\NegotiationController.cs" />

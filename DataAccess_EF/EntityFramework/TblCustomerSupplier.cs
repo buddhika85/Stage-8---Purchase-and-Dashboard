@@ -16,6 +16,7 @@ namespace DataAccess_EF.EntityFramework
     {
         public TblCustomerSupplier()
         {
+            this.TblConfirmedOrderlineChanges = new HashSet<TblConfirmedOrderlineChange>();
             this.TblContacts = new HashSet<TblContact>();
         }
     
@@ -40,6 +41,7 @@ namespace DataAccess_EF.EntityFramework
         public Nullable<System.DateTime> inactiveDateTime { get; set; }
         public bool active { get; set; }
     
+        public virtual ICollection<TblConfirmedOrderlineChange> TblConfirmedOrderlineChanges { get; set; }
         public virtual ICollection<TblContact> TblContacts { get; set; }
     }
 }

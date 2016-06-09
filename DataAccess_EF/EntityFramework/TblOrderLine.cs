@@ -14,6 +14,11 @@ namespace DataAccess_EF.EntityFramework
     
     public partial class TblOrderLine
     {
+        public TblOrderLine()
+        {
+            this.TblConfirmedOrderlineChanges = new HashSet<TblConfirmedOrderlineChange>();
+        }
+    
         public int id { get; set; }
         public int productId { get; set; }
         public Nullable<decimal> quantity { get; set; }
@@ -24,6 +29,7 @@ namespace DataAccess_EF.EntityFramework
         public System.DateTime orderlineDateTime { get; set; }
         public Nullable<int> orderId { get; set; }
     
+        public virtual ICollection<TblConfirmedOrderlineChange> TblConfirmedOrderlineChanges { get; set; }
         public virtual TblOrder TblOrder { get; set; }
     }
 }

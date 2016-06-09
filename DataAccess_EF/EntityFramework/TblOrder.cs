@@ -16,6 +16,7 @@ namespace DataAccess_EF.EntityFramework
     {
         public TblOrder()
         {
+            this.TblConfirmedOrderlineChanges = new HashSet<TblConfirmedOrderlineChange>();
             this.TblNegotiations = new HashSet<TblNegotiation>();
             this.TblOrderLines = new HashSet<TblOrderLine>();
         }
@@ -30,6 +31,7 @@ namespace DataAccess_EF.EntityFramework
         public string vat { get; set; }
         public string pastOrder { get; set; }
     
+        public virtual ICollection<TblConfirmedOrderlineChange> TblConfirmedOrderlineChanges { get; set; }
         public virtual TblContact TblContact { get; set; }
         public virtual TblCurrency TblCurrency { get; set; }
         public virtual ICollection<TblNegotiation> TblNegotiations { get; set; }

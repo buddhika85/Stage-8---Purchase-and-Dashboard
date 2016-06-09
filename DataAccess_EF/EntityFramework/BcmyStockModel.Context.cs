@@ -27,20 +27,21 @@ namespace DataAccess_EF.EntityFramework
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<TblBusiness> TblBusinesses { get; set; }
-        public virtual DbSet<TblContact> TblContacts { get; set; }
-        public virtual DbSet<TblNegotiation> TblNegotiations { get; set; }
-        public virtual DbSet<TblOrderLine> TblOrderLines { get; set; }
-        public virtual DbSet<TblProductStock> TblProductStocks { get; set; }
-        public virtual DbSet<TblCurrency> TblCurrencies { get; set; }
-        public virtual DbSet<TblExchangeRate> TblExchangeRates { get; set; }
-        public virtual DbSet<TblOrder> TblOrders { get; set; }
-        public virtual DbSet<TblCustomerSupplier> TblCustomerSuppliers { get; set; }
         public virtual DbSet<C__MigrationHistory> C__MigrationHistory { get; set; }
         public virtual DbSet<AspNetRole> AspNetRoles { get; set; }
         public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; }
         public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; }
         public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
+        public virtual DbSet<TblBusiness> TblBusinesses { get; set; }
+        public virtual DbSet<TblConfirmedOrderlineChange> TblConfirmedOrderlineChanges { get; set; }
+        public virtual DbSet<TblContact> TblContacts { get; set; }
+        public virtual DbSet<TblCurrency> TblCurrencies { get; set; }
+        public virtual DbSet<TblCustomerSupplier> TblCustomerSuppliers { get; set; }
+        public virtual DbSet<TblExchangeRate> TblExchangeRates { get; set; }
+        public virtual DbSet<TblNegotiation> TblNegotiations { get; set; }
+        public virtual DbSet<TblOrder> TblOrders { get; set; }
+        public virtual DbSet<TblOrderLine> TblOrderLines { get; set; }
+        public virtual DbSet<TblProductStock> TblProductStocks { get; set; }
         public virtual DbSet<TblStockUnavailableReason> TblStockUnavailableReasons { get; set; }
     
         public virtual ObjectResult<string> SP_ConfirmOrder(Nullable<int> orderId)
@@ -560,6 +561,108 @@ namespace DataAccess_EF.EntityFramework
                 new ObjectParameter("orderType", typeof(string));
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<SP_GetChartsSalesPurchasesCountryDeviation_Result>("SP_GetChartsSalesPurchasesCountryDeviation", orderTypeParameter);
+        }
+    
+        public virtual ObjectResult<SP_GetOrderlineAndOrderDetails_Result> SP_GetOrderlineAndOrderDetails(Nullable<int> orderlineId)
+        {
+            var orderlineIdParameter = orderlineId.HasValue ?
+                new ObjectParameter("orderlineId", orderlineId) :
+                new ObjectParameter("orderlineId", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<SP_GetOrderlineAndOrderDetails_Result>("SP_GetOrderlineAndOrderDetails", orderlineIdParameter);
+        }
+    
+        public virtual ObjectResult<SP_SaveOrderlineDiscrepancyChange_Result> SP_SaveOrderlineDiscrepancyChange(Nullable<int> productListId, Nullable<decimal> quantityVal, Nullable<decimal> pricePerItem, Nullable<decimal> totalAmountVal, string status, Nullable<System.DateTime> dateTime, Nullable<int> orderIdVal, Nullable<int> orderlineId, string model, Nullable<int> customerId, string customerName, Nullable<int> conatctId, string contactFullName, Nullable<int> promisedQuantity, Nullable<decimal> promisedPricePerItem, Nullable<decimal> promisedTotal, Nullable<int> newQuantity, Nullable<decimal> newPricePerItem, Nullable<decimal> newTotal, string updateStockStatus, Nullable<int> updateCount, string userRecorded)
+        {
+            var productListIdParameter = productListId.HasValue ?
+                new ObjectParameter("productListId", productListId) :
+                new ObjectParameter("productListId", typeof(int));
+    
+            var quantityValParameter = quantityVal.HasValue ?
+                new ObjectParameter("quantityVal", quantityVal) :
+                new ObjectParameter("quantityVal", typeof(decimal));
+    
+            var pricePerItemParameter = pricePerItem.HasValue ?
+                new ObjectParameter("pricePerItem", pricePerItem) :
+                new ObjectParameter("pricePerItem", typeof(decimal));
+    
+            var totalAmountValParameter = totalAmountVal.HasValue ?
+                new ObjectParameter("totalAmountVal", totalAmountVal) :
+                new ObjectParameter("totalAmountVal", typeof(decimal));
+    
+            var statusParameter = status != null ?
+                new ObjectParameter("status", status) :
+                new ObjectParameter("status", typeof(string));
+    
+            var dateTimeParameter = dateTime.HasValue ?
+                new ObjectParameter("dateTime", dateTime) :
+                new ObjectParameter("dateTime", typeof(System.DateTime));
+    
+            var orderIdValParameter = orderIdVal.HasValue ?
+                new ObjectParameter("orderIdVal", orderIdVal) :
+                new ObjectParameter("orderIdVal", typeof(int));
+    
+            var orderlineIdParameter = orderlineId.HasValue ?
+                new ObjectParameter("orderlineId", orderlineId) :
+                new ObjectParameter("orderlineId", typeof(int));
+    
+            var modelParameter = model != null ?
+                new ObjectParameter("model", model) :
+                new ObjectParameter("model", typeof(string));
+    
+            var customerIdParameter = customerId.HasValue ?
+                new ObjectParameter("customerId", customerId) :
+                new ObjectParameter("customerId", typeof(int));
+    
+            var customerNameParameter = customerName != null ?
+                new ObjectParameter("customerName", customerName) :
+                new ObjectParameter("customerName", typeof(string));
+    
+            var conatctIdParameter = conatctId.HasValue ?
+                new ObjectParameter("conatctId", conatctId) :
+                new ObjectParameter("conatctId", typeof(int));
+    
+            var contactFullNameParameter = contactFullName != null ?
+                new ObjectParameter("contactFullName", contactFullName) :
+                new ObjectParameter("contactFullName", typeof(string));
+    
+            var promisedQuantityParameter = promisedQuantity.HasValue ?
+                new ObjectParameter("promisedQuantity", promisedQuantity) :
+                new ObjectParameter("promisedQuantity", typeof(int));
+    
+            var promisedPricePerItemParameter = promisedPricePerItem.HasValue ?
+                new ObjectParameter("promisedPricePerItem", promisedPricePerItem) :
+                new ObjectParameter("promisedPricePerItem", typeof(decimal));
+    
+            var promisedTotalParameter = promisedTotal.HasValue ?
+                new ObjectParameter("promisedTotal", promisedTotal) :
+                new ObjectParameter("promisedTotal", typeof(decimal));
+    
+            var newQuantityParameter = newQuantity.HasValue ?
+                new ObjectParameter("newQuantity", newQuantity) :
+                new ObjectParameter("newQuantity", typeof(int));
+    
+            var newPricePerItemParameter = newPricePerItem.HasValue ?
+                new ObjectParameter("newPricePerItem", newPricePerItem) :
+                new ObjectParameter("newPricePerItem", typeof(decimal));
+    
+            var newTotalParameter = newTotal.HasValue ?
+                new ObjectParameter("newTotal", newTotal) :
+                new ObjectParameter("newTotal", typeof(decimal));
+    
+            var updateStockStatusParameter = updateStockStatus != null ?
+                new ObjectParameter("updateStockStatus", updateStockStatus) :
+                new ObjectParameter("updateStockStatus", typeof(string));
+    
+            var updateCountParameter = updateCount.HasValue ?
+                new ObjectParameter("updateCount", updateCount) :
+                new ObjectParameter("updateCount", typeof(int));
+    
+            var userRecordedParameter = userRecorded != null ?
+                new ObjectParameter("userRecorded", userRecorded) :
+                new ObjectParameter("userRecorded", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<SP_SaveOrderlineDiscrepancyChange_Result>("SP_SaveOrderlineDiscrepancyChange", productListIdParameter, quantityValParameter, pricePerItemParameter, totalAmountValParameter, statusParameter, dateTimeParameter, orderIdValParameter, orderlineIdParameter, modelParameter, customerIdParameter, customerNameParameter, conatctIdParameter, contactFullNameParameter, promisedQuantityParameter, promisedPricePerItemParameter, promisedTotalParameter, newQuantityParameter, newPricePerItemParameter, newTotalParameter, updateStockStatusParameter, updateCountParameter, userRecordedParameter);
         }
     }
 }

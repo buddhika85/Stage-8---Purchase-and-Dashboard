@@ -29,7 +29,9 @@ namespace GenericRepository_UnitOfWork.UOW
         private GenericRepository<TblProductStock> productStockRepository;        
         private GenericRepository<TblExchangeRate> exchangeRateRepository;        
         private GenericRepository<TblCurrency> currencyRepository;
-        private GenericRepository<AspNetUser> aspNetUserRepository;     
+        private GenericRepository<AspNetUser> aspNetUserRepository;
+        private GenericRepository<TblStockUnavailableReason> stockUnavailableReasonRepository;
+        private GenericRepository<TblConfirmedOrderlineChange> confirmedOrderlineChangeRepository;
                 
         // add more repositories below
         // ...
@@ -145,6 +147,28 @@ namespace GenericRepository_UnitOfWork.UOW
                 }
                 return aspNetUserRepository;
             }        
+        }
+        public GenericRepository<TblStockUnavailableReason> StockUnavailableReasonRepository
+        {
+            get
+            {
+                if (stockUnavailableReasonRepository == null)
+                {
+                    stockUnavailableReasonRepository = new GenericRepository<TblStockUnavailableReason>(_context);
+                }
+                return stockUnavailableReasonRepository;
+            }
+        }
+        public GenericRepository<TblConfirmedOrderlineChange> ConfirmedOrderlineChangeRepository
+        {
+            get
+            {
+                if (confirmedOrderlineChangeRepository == null)
+                {
+                    confirmedOrderlineChangeRepository = new GenericRepository<TblConfirmedOrderlineChange>(_context);
+                }
+                return confirmedOrderlineChangeRepository;
+            }
         }
         // add more repositories below
         // ...

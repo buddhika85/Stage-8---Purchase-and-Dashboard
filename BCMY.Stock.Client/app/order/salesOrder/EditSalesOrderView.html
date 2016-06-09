@@ -393,14 +393,30 @@
                                 <legend style="font-size:medium;">Order line Details</legend>
                                 <div class="row">
                                     <div class="col-md-4">
+                                        <label for="orderlineIdDf" class="fontWeightNormal">Orderline ID - </label>
+                                        <label id="orderlineIdDf" class="darkBlueFont">{{vm.orderlineId}}</label>
+                                    </div>
+                                    <div class="col-md-4">
                                         <label for="prodIdDf" class="fontWeightNormal">Product list ID - </label>
                                         <label id="prodIdDf" class="darkBlueFont">{{vm.productListId}}</label>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="modelDf" class="fontWeightNormal">Model -</label>
                                         <label id="modelDf" class="darkBlueFont">{{vm.productModel}}</label>
+                                    </div>                                    
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="orderlineIdDf" class="fontWeightNormal">Market Value GBP - </label>
+                                        <label id="orderlineIdDf" class="darkBlueFont">£ {{vm.marketValueInGBP}}</label>
                                     </div>
                                     <div class="col-md-4">
+                                        <label for="prodIdDf" class="fontWeightNormal">Market Value {{vm.currency}} - </label>
+                                        <label id="prodIdDf" class="darkBlueFont">{{vm.marketValueInSpecificCurrencyDf}}</label>
+                                    </div>
+                                    <div class="col-md-4">  
+                                        <label for="freeStockDf" class="fontWeightNormal">Available stock - </label>
+                                        <label id="freeStockDf" class="darkBlueFont">{{vm.availableStock}}</label>                                      
                                     </div>
                                 </div>
                                 <div class="row">
@@ -440,47 +456,66 @@
                             <fieldset>
                                 <legend style="font-size:medium;">Discrepancy Details</legend>
                                 <div class="row">
-                                    <div class="col-md-4">
-                                        <label for="DisDf" class="fontWeightNormal">Discrepancy (+/-) - </label>
-                                        <label id="DisDf" class="darkBlueFont">{{vm.difference}}</label>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <label for="reasonDf" class="fontWeightNormal">Reason -</label>
-                                        <label id="reasonDf" class="darkBlueFont">{{vm.reasonForDifference}}</label>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <label for="newQtyDf" class="fontWeightNormal">New Qty - </label>
-                                        <label id="newQtyDf" class="darkBlueFont">{{vm.newQty}}</label>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="newPriceDf" class="fontWeightNormal">New Price -</label>
-                                        <label id="newPriceDf" class="darkBlueFont">{{vm.newPrice}}</label>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="newTotDf" class="fontWeightNormal">New Total - </label>
-                                        <label id="newTotDf" class="darkBlueFont">{{vm.newTotal}}</label>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <label for="newStatusDf" class="fontWeightNormal">New Status - </label>
-                                        <label id="newStatusDf" class="darkBlueFont">{{vm.newStatus}}</label>
-                                    </div>
-                                    <div class="col-md-8">                                        
+                                    <div class="col-md-12">
+                                        <label for="DisDf" class="fontWeightNormal col-md-4" style="text-align:right">Discrepancy (+/-) -</label>
+                                        <input type="text" id="DisDf" class="darkBlueFont" ng-model="vm.difference" />
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <label for="freeStockDf" class="fontWeightNormal">Free Stock Count -</label>
-                                        <label id="freeStockDf" class="darkBlueFont">{{vm.freeStock}}</label>
-                                        <label class="darkBlueFont">** Will update stock count as it is counted now</label>
+                                        <label for="reasonDf" class="fontWeightNormal col-md-4" style="text-align:right">Reason -</label>
+                                        <select id="reasonDf" class="darkBlueFont" ng-model="vm.reasonForDifference">
+                                            <option ng-repeat="reason in vm.unavailableReason" value="{{reason.reasonId}}">{{reason.reasonName}}</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <label class="fontWeightNormal" style="color:red">{{vm.errorDf}}</label>
+                                        <label for="newQtyDf" class="fontWeightNormal col-md-4" style="text-align:right">New Qty - </label>
+                                        <input id="newQtyDf" class="darkBlueFont" ng-model="vm.newQty" />
+                                    </div>                                                                   
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label for="newStatusDf" class="fontWeightNormal col-md-4" style="text-align:right">New Status - </label>
+                                        <select id="newStatusDf" class="darkBlueFont" ng-model="vm.newStatus">
+                                            <option value="in negotiation" selected>in negotiation</option>
+                                            <option value="confirmed">confirmed</option>
+                                            <option value="rejected">rejected</option>
+                                        </select>   
+                                    </div>     
+                                </div>
+                                <div class="row">                                    
+                                    <div class="col-md-12">
+                                        <label for="newPriceDf" class="fontWeightNormal col-md-4" style="text-align:right">New Price -</label>
+                                        <input id="newPriceDf" class="darkBlueFont" ng-model="vm.newPrice" />
+                                    </div>                                    
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label for="newTotDf" class="fontWeightNormal col-md-4" style="text-align:right">New Total - </label>
+                                        <input id="newTotDf" class="darkBlueFont" ng-model="vm.newTotal" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label for="updateStockDf" class="fontWeightNormal col-md-4" style="text-align:right">Update Stock or not -</label>
+                                        <select id="updateStockDf" class="darkBlueFont" ng-model="vm.stockUpdateOption">
+                                            <option value="Add to Stock">Add to Stock</option>
+                                            <option value="Discard from Stock">Discard from Stock</option>
+                                            <option value="Keep stock as it is">Keep stock as it is</option>
+                                        </select>                                        
+                                    </div>                                    
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label for="updateStockCountDf" class="fontWeightNormal col-md-4" style="text-align:right">Update Count -</label>
+                                        <input id="updateStockCountDf" class="darkBlueFont" ng-model="vm.updateStocCountkDf" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label class="fontWeightNormal" style="color:red; text-align:left">{{vm.errorDf}}</label>
                                     </div>
                                 </div>
                                 <fieldset>

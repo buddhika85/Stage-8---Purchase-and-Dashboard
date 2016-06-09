@@ -99,6 +99,31 @@
           <Property Name="iban" Type="varchar" MaxLength="200" />
           <Property Name="swift" Type="varchar" MaxLength="200" />
         </EntityType>
+        <EntityType Name="TblConfirmedOrderlineChange">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="orderId" Type="int" Nullable="false" />
+          <Property Name="orderlineId" Type="int" Nullable="false" />
+          <Property Name="productlistId" Type="int" Nullable="false" />
+          <Property Name="model" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="customerId" Type="int" Nullable="false" />
+          <Property Name="customerName" Type="varchar" MaxLength="30" Nullable="false" />
+          <Property Name="contactId" Type="int" Nullable="false" />
+          <Property Name="contactFullName" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="promisedQuantity" Type="int" Nullable="false" />
+          <Property Name="promisedPricePerItem" Type="decimal" Precision="10" Scale="5" Nullable="false" />
+          <Property Name="promisedTotal" Type="decimal" Precision="10" Scale="5" Nullable="false" />
+          <Property Name="newQuantity" Type="int" Nullable="false" />
+          <Property Name="newPricePerItem" Type="decimal" Precision="10" Scale="5" Nullable="false" />
+          <Property Name="newTotal" Type="decimal" Precision="10" Scale="5" Nullable="false" />
+          <Property Name="updateStockStatus" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="updateCount" Type="int" Nullable="false" />
+          <Property Name="userRecorded" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="discrepancy" Type="int" StoreGeneratedPattern="Computed" />
+          <Property Name="changeDateTime" Type="datetime" />
+        </EntityType>
         <EntityType Name="TblContact">
           <Key>
             <PropertyRef Name="id" />
@@ -209,17 +234,74 @@
           <Property Name="lastAmendedDate" Type="datetime" />
           <Property Name="lastIncrementDate" Type="datetime" />
         </EntityType>
-        <!--Errors Found During Generation:
-warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="TblStockUnavailableReasons">
           <Key>
             <PropertyRef Name="reasonId" />
-            <PropertyRef Name="reasonName" />
           </Key>
           <Property Name="reasonId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="reasonName" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="reasonDescription" Type="varchar(max)" />
         </EntityType>
+        <Association Name="FK__TblConfir__conta__09C96D33">
+          <End Role="TblContact" Type="Self.TblContact" Multiplicity="1" />
+          <End Role="TblConfirmedOrderlineChange" Type="Self.TblConfirmedOrderlineChange" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblContact">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblConfirmedOrderlineChange">
+              <PropertyRef Name="contactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblConfir__custo__08D548FA">
+          <End Role="TblCustomerSupplier" Type="Self.TblCustomerSupplier" Multiplicity="1" />
+          <End Role="TblConfirmedOrderlineChange" Type="Self.TblConfirmedOrderlineChange" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblCustomerSupplier">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblConfirmedOrderlineChange">
+              <PropertyRef Name="customerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblConfir__order__05F8DC4F">
+          <End Role="TblOrder" Type="Self.TblOrder" Multiplicity="1" />
+          <End Role="TblConfirmedOrderlineChange" Type="Self.TblConfirmedOrderlineChange" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblOrder">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblConfirmedOrderlineChange">
+              <PropertyRef Name="orderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblConfir__order__06ED0088">
+          <End Role="TblOrderLine" Type="Self.TblOrderLine" Multiplicity="1" />
+          <End Role="TblConfirmedOrderlineChange" Type="Self.TblConfirmedOrderlineChange" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblOrderLine">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblConfirmedOrderlineChange">
+              <PropertyRef Name="orderlineId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblConfir__produ__07E124C1">
+          <End Role="TblProductStock" Type="Self.TblProductStock" Multiplicity="1" />
+          <End Role="TblConfirmedOrderlineChange" Type="Self.TblConfirmedOrderlineChange" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblProductStock">
+              <PropertyRef Name="productId" />
+            </Principal>
+            <Dependent Role="TblConfirmedOrderlineChange">
+              <PropertyRef Name="productlistId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__TblContac__custo__719CDDE7">
           <End Role="TblCustomerSupplier" Type="Self.TblCustomerSupplier" Multiplicity="0..1" />
           <End Role="TblContact" Type="Self.TblContact" Multiplicity="*" />
@@ -424,6 +506,9 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
           <Parameter Name="selectedCurrency" Type="varchar" Mode="In" />
           <Parameter Name="numOfNegotiations" Type="int" Mode="In" />
         </Function>
+        <Function Name="SP_GetOrderlineAndOrderDetails" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="orderlineId" Type="int" Mode="In" />
+        </Function>
         <Function Name="SP_GetOrderlineInfoById" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="orderlineId" Type="int" Mode="In" />
           <Parameter Name="orderCurrency" Type="varchar" Mode="In" />
@@ -455,6 +540,30 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
           <Parameter Name="insertEditStatus" Type="varchar" Mode="InOut" />
         </Function>
         <Function Name="SP_PopulateTblProductStockForTesting" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="SP_SaveOrderlineDiscrepancyChange" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="productListId" Type="int" Mode="In" />
+          <Parameter Name="quantityVal" Type="decimal" Mode="In" />
+          <Parameter Name="pricePerItem" Type="decimal" Mode="In" />
+          <Parameter Name="totalAmountVal" Type="decimal" Mode="In" />
+          <Parameter Name="status" Type="varchar" Mode="In" />
+          <Parameter Name="dateTime" Type="datetime" Mode="In" />
+          <Parameter Name="orderIdVal" Type="int" Mode="In" />
+          <Parameter Name="orderlineId" Type="int" Mode="In" />
+          <Parameter Name="model" Type="varchar" Mode="In" />
+          <Parameter Name="customerId" Type="int" Mode="In" />
+          <Parameter Name="customerName" Type="varchar" Mode="In" />
+          <Parameter Name="conatctId" Type="int" Mode="In" />
+          <Parameter Name="contactFullName" Type="varchar" Mode="In" />
+          <Parameter Name="promisedQuantity" Type="int" Mode="In" />
+          <Parameter Name="promisedPricePerItem" Type="decimal" Mode="In" />
+          <Parameter Name="promisedTotal" Type="decimal" Mode="In" />
+          <Parameter Name="newQuantity" Type="int" Mode="In" />
+          <Parameter Name="newPricePerItem" Type="decimal" Mode="In" />
+          <Parameter Name="newTotal" Type="decimal" Mode="In" />
+          <Parameter Name="updateStockStatus" Type="varchar" Mode="In" />
+          <Parameter Name="updateCount" Type="int" Mode="In" />
+          <Parameter Name="userRecorded" Type="varchar" Mode="In" />
+        </Function>
         <Function Name="SP_SaveOrderLineWithNegotiation" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="productListId" Type="int" Mode="In" />
           <Parameter Name="quantityVal" Type="decimal" Mode="In" />
@@ -524,6 +633,7 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
           <EntitySet Name="AspNetUserRoles" EntityType="Self.AspNetUserRoles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="AspNetUsers" EntityType="Self.AspNetUsers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TblBusiness" EntityType="Self.TblBusiness" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TblConfirmedOrderlineChange" EntityType="Self.TblConfirmedOrderlineChange" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TblContact" EntityType="Self.TblContact" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TblCurrencies" EntityType="Self.TblCurrencies" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TblCustomerSupplier" EntityType="Self.TblCustomerSupplier" Schema="dbo" store:Type="Tables" />
@@ -532,13 +642,27 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
           <EntitySet Name="TblOrder" EntityType="Self.TblOrder" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TblOrderLine" EntityType="Self.TblOrderLine" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TblProductStock" EntityType="Self.TblProductStock" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="TblStockUnavailableReasons" EntityType="Self.TblStockUnavailableReasons" store:Type="Tables" store:Schema="dbo">
-            <DefiningQuery>SELECT 
-    [TblStockUnavailableReasons].[reasonId] AS [reasonId], 
-    [TblStockUnavailableReasons].[reasonName] AS [reasonName], 
-    [TblStockUnavailableReasons].[reasonDescription] AS [reasonDescription]
-    FROM [dbo].[TblStockUnavailableReasons] AS [TblStockUnavailableReasons]</DefiningQuery>
-          </EntitySet>
+          <EntitySet Name="TblStockUnavailableReasons" EntityType="Self.TblStockUnavailableReasons" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__TblConfir__conta__09C96D33" Association="Self.FK__TblConfir__conta__09C96D33">
+            <End Role="TblContact" EntitySet="TblContact" />
+            <End Role="TblConfirmedOrderlineChange" EntitySet="TblConfirmedOrderlineChange" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblConfir__custo__08D548FA" Association="Self.FK__TblConfir__custo__08D548FA">
+            <End Role="TblCustomerSupplier" EntitySet="TblCustomerSupplier" />
+            <End Role="TblConfirmedOrderlineChange" EntitySet="TblConfirmedOrderlineChange" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblConfir__order__05F8DC4F" Association="Self.FK__TblConfir__order__05F8DC4F">
+            <End Role="TblOrder" EntitySet="TblOrder" />
+            <End Role="TblConfirmedOrderlineChange" EntitySet="TblConfirmedOrderlineChange" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblConfir__order__06ED0088" Association="Self.FK__TblConfir__order__06ED0088">
+            <End Role="TblOrderLine" EntitySet="TblOrderLine" />
+            <End Role="TblConfirmedOrderlineChange" EntitySet="TblConfirmedOrderlineChange" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblConfir__produ__07E124C1" Association="Self.FK__TblConfir__produ__07E124C1">
+            <End Role="TblProductStock" EntitySet="TblProductStock" />
+            <End Role="TblConfirmedOrderlineChange" EntitySet="TblConfirmedOrderlineChange" />
+          </AssociationSet>
           <AssociationSet Name="FK__TblContac__custo__719CDDE7" Association="Self.FK__TblContac__custo__719CDDE7">
             <End Role="TblCustomerSupplier" EntitySet="TblCustomerSupplier" />
             <End Role="TblContact" EntitySet="TblContact" />
@@ -580,87 +704,7 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="BCMY_StockModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="TblBusiness">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="name" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="logo" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="addressLine1" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="addressLine2" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="addressLine3" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="postcode" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="country" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="bank" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="accountNumber" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="sortcode" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="iban" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="swift" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-        </EntityType>
-        <EntityType Name="TblContact">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="title" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="firstName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="lastName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="position" Type="String" MaxLength="55" FixedLength="false" Unicode="false" />
-          <Property Name="directDial" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="extension" Type="Int32" />
-          <Property Name="email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="status" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="customerSupplierId" Type="Int32" />
-          <NavigationProperty Name="TblOrders" Relationship="BCMY_StockModel.FK__TblOrder__contac__76619304" FromRole="TblContact" ToRole="TblOrder" />
-          <NavigationProperty Name="TblCustomerSupplier" Relationship="BCMY_StockModel.FK__TblContac__custo__719CDDE7" FromRole="TblContact" ToRole="TblCustomerSupplier" />
-        </EntityType>
-        <EntityType Name="TblNegotiation">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="productId" Type="Int32" Nullable="false" />
-          <Property Name="quantity" Type="Decimal" Precision="10" Scale="5" />
-          <Property Name="negotiatedPricePerItem" Type="Decimal" Precision="10" Scale="5" />
-          <Property Name="totalAmount" Type="Decimal" Precision="10" Scale="5" />
-          <Property Name="status" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="negotiationDateTime" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="orderId" Type="Int32" />
-          <NavigationProperty Name="TblOrder" Relationship="BCMY_StockModel.FK__TblNegoti__order__7E02B4CC" FromRole="TblNegotiation" ToRole="TblOrder" />
-        </EntityType>
-        <EntityType Name="TblOrderLine">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="productId" Type="Int32" Nullable="false" />
-          <Property Name="quantity" Type="Decimal" Precision="10" Scale="5" />
-          <Property Name="negotiatedPricePerItem" Type="Decimal" Precision="10" Scale="5" />
-          <Property Name="totalAmount" Type="Decimal" Precision="10" Scale="5" />
-          <Property Name="status" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="orderLineQuantityStatus" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="orderlineDateTime" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="orderId" Type="Int32" />
-          <NavigationProperty Name="TblOrder" Relationship="BCMY_StockModel.FK__TblOrderL__order__7A3223E8" FromRole="TblOrderLine" ToRole="TblOrder" />
-        </EntityType>
-        <EntityType Name="TblProductStock">
-          <Key>
-            <PropertyRef Name="productId" />
-          </Key>
-          <Property Name="productId" Type="Int32" Nullable="false" />
-          <Property Name="quantity" Type="Int32" Nullable="false" />
-          <Property Name="stockCountAmended" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
-          <Property Name="lastAmendedDate" Type="DateTime" Precision="3" />
-          <Property Name="lastIncrementDate" Type="DateTime" Precision="3" />
-        </EntityType>
         <EntityContainer Name="BCMY_StockEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="TblBusinesses" EntityType="Self.TblBusiness" />
-          <EntitySet Name="TblContacts" EntityType="Self.TblContact" />
-          <EntitySet Name="TblNegotiations" EntityType="Self.TblNegotiation" />
-          <EntitySet Name="TblOrderLines" EntityType="Self.TblOrderLine" />
-          <EntitySet Name="TblProductStocks" EntityType="Self.TblProductStock" />
           <FunctionImport Name="SP_ConfirmOrder" ReturnType="Collection(String)">
           <Parameter Name="orderId" Mode="In" Type="Int32" />
           </FunctionImport>
@@ -721,8 +765,6 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
             <Parameter Name="creationDateTo" Mode="In" Type="DateTime" />
           </FunctionImport>
           <FunctionImport Name="SP_SearchOrders_Simple" ReturnType="Collection(BCMY_StockModel.SP_SearchOrders_Simple_Result)" />
-          <EntitySet Name="TblCurrencies" EntityType="BCMY_StockModel.TblCurrency" />
-          <EntitySet Name="TblExchangeRates" EntityType="BCMY_StockModel.TblExchangeRate" />
           <FunctionImport Name="SP_GetSuccessNumOfNegotiationsByProductId" ReturnType="Collection(BCMY_StockModel.SP_GetSuccessNumOfNegotiationsByProductId_Result)">
             <Parameter Name="orderId" Mode="In" Type="Int32" />
             <Parameter Name="productListId" Mode="In" Type="Int32" />
@@ -733,28 +775,6 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
             <Parameter Name="euro" Mode="In" Type="Decimal" />
             <Parameter Name="insertEditStatus" Mode="InOut" Type="String" />
           </FunctionImport>
-          <EntitySet Name="TblOrders" EntityType="BCMY_StockModel.TblOrder" />
-          <AssociationSet Name="FK__TblOrder__contac__76619304" Association="BCMY_StockModel.FK__TblOrder__contac__76619304">
-            <End Role="TblContact" EntitySet="TblContacts" />
-            <End Role="TblOrder" EntitySet="TblOrders" />
-          </AssociationSet>
-          <AssociationSet Name="FK__TblOrder__curren__12FDD1B2" Association="BCMY_StockModel.FK__TblOrder__curren__12FDD1B2">
-            <End Role="TblCurrency" EntitySet="TblCurrencies" />
-            <End Role="TblOrder" EntitySet="TblOrders" />
-          </AssociationSet>
-          <AssociationSet Name="FK__TblNegoti__order__7E02B4CC" Association="BCMY_StockModel.FK__TblNegoti__order__7E02B4CC">
-            <End Role="TblOrder" EntitySet="TblOrders" />
-            <End Role="TblNegotiation" EntitySet="TblNegotiations" />
-          </AssociationSet>
-          <AssociationSet Name="FK__TblOrderL__order__7A3223E8" Association="BCMY_StockModel.FK__TblOrderL__order__7A3223E8">
-            <End Role="TblOrder" EntitySet="TblOrders" />
-            <End Role="TblOrderLine" EntitySet="TblOrderLines" />
-          </AssociationSet>
-          <EntitySet Name="TblCustomerSuppliers" EntityType="BCMY_StockModel.TblCustomerSupplier" />
-          <AssociationSet Name="FK__TblContac__custo__719CDDE7" Association="BCMY_StockModel.FK__TblContac__custo__719CDDE7">
-            <End Role="TblCustomerSupplier" EntitySet="TblCustomerSuppliers" />
-            <End Role="TblContact" EntitySet="TblContacts" />
-          </AssociationSet>
           <FunctionImport Name="SP_GetAllCurrencies" ReturnType="Collection(BCMY_StockModel.SP_GetAllCurrencies_Result)" />
           <FunctionImport Name="SP_GetAllCustomerSuppliers" ReturnType="Collection(BCMY_StockModel.SP_GetAllCustomerSuppliers_Result)" />
           <FunctionImport Name="SP_GetChartsExchangeRatesDeviation" ReturnType="Collection(BCMY_StockModel.SP_GetChartsExchangeRatesDeviation_Result)" />
@@ -770,23 +790,6 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
             <Parameter Name="euroVal" Mode="In" Type="Decimal" />
             <Parameter Name="usdVal" Mode="In" Type="Decimal" />
           </FunctionImport>
-          <EntitySet Name="C__MigrationHistory" EntityType="BCMY_StockModel.C__MigrationHistory" />
-          <EntitySet Name="AspNetRoles" EntityType="BCMY_StockModel.AspNetRole" />
-          <EntitySet Name="AspNetUserClaims" EntityType="BCMY_StockModel.AspNetUserClaim" />
-          <EntitySet Name="AspNetUserLogins" EntityType="BCMY_StockModel.AspNetUserLogin" />
-          <EntitySet Name="AspNetUsers" EntityType="BCMY_StockModel.AspNetUser" />
-          <AssociationSet Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" Association="BCMY_StockModel.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
-            <End Role="AspNetUser" EntitySet="AspNetUsers" />
-            <End Role="AspNetUserClaim" EntitySet="AspNetUserClaims" />
-          </AssociationSet>
-          <AssociationSet Name="FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" Association="BCMY_StockModel.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId">
-            <End Role="AspNetUser" EntitySet="AspNetUsers" />
-            <End Role="AspNetUserLogin" EntitySet="AspNetUserLogins" />
-          </AssociationSet>
-          <AssociationSet Name="AspNetUserRoles" Association="BCMY_StockModel.AspNetUserRoles">
-            <End Role="AspNetRole" EntitySet="AspNetRoles" />
-            <End Role="AspNetUser" EntitySet="AspNetUsers" />
-          </AssociationSet>
           <FunctionImport Name="SP_CreatePastSalesOrder" ReturnType="Collection(String)">
             <Parameter Name="companyId" Mode="In" Type="Int32" />
             <Parameter Name="contactFulName" Mode="In" Type="String" />
@@ -845,13 +848,107 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
             <Parameter Name="List" Mode="In" Type="String" />
             <Parameter Name="Delimiter" Mode="In" Type="String" />
           </FunctionImport>
-          <EntitySet Name="TblStockUnavailableReasons" EntityType="BCMY_StockModel.TblStockUnavailableReason" />
           <FunctionImport Name="CSVToTable" IsComposable="true" ReturnType="Collection(Int32)">
-            <Parameter Name="InStr" Mode="In" Type="String" />
+          <Parameter Name="InStr" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="SP_GetChartsSalesPurchasesCountryDeviation" ReturnType="Collection(BCMY_StockModel.SP_GetChartsSalesPurchasesCountryDeviation_Result)">
-            <Parameter Name="orderType" Mode="In" Type="String" />
+          <Parameter Name="orderType" Mode="In" Type="String" />
           </FunctionImport>
+          <FunctionImport Name="SP_GetOrderlineAndOrderDetails" ReturnType="Collection(BCMY_StockModel.SP_GetOrderlineAndOrderDetails_Result)">
+          <Parameter Name="orderlineId" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="SP_SaveOrderlineDiscrepancyChange" ReturnType="Collection(BCMY_StockModel.SP_SaveOrderlineDiscrepancyChange_Result)">
+            <Parameter Name="productListId" Mode="In" Type="Int32" />
+            <Parameter Name="quantityVal" Mode="In" Type="Decimal" />
+            <Parameter Name="pricePerItem" Mode="In" Type="Decimal" />
+            <Parameter Name="totalAmountVal" Mode="In" Type="Decimal" />
+            <Parameter Name="status" Mode="In" Type="String" />
+            <Parameter Name="dateTime" Mode="In" Type="DateTime" />
+            <Parameter Name="orderIdVal" Mode="In" Type="Int32" />
+            <Parameter Name="orderlineId" Mode="In" Type="Int32" />
+            <Parameter Name="model" Mode="In" Type="String" />
+            <Parameter Name="customerId" Mode="In" Type="Int32" />
+            <Parameter Name="customerName" Mode="In" Type="String" />
+            <Parameter Name="conatctId" Mode="In" Type="Int32" />
+            <Parameter Name="contactFullName" Mode="In" Type="String" />
+            <Parameter Name="promisedQuantity" Mode="In" Type="Int32" />
+            <Parameter Name="promisedPricePerItem" Mode="In" Type="Decimal" />
+            <Parameter Name="promisedTotal" Mode="In" Type="Decimal" />
+            <Parameter Name="newQuantity" Mode="In" Type="Int32" />
+            <Parameter Name="newPricePerItem" Mode="In" Type="Decimal" />
+            <Parameter Name="newTotal" Mode="In" Type="Decimal" />
+            <Parameter Name="updateStockStatus" Mode="In" Type="String" />
+            <Parameter Name="updateCount" Mode="In" Type="Int32" />
+            <Parameter Name="userRecorded" Mode="In" Type="String" />
+          </FunctionImport>
+          <EntitySet Name="C__MigrationHistory" EntityType="BCMY_StockModel.C__MigrationHistory" />
+          <EntitySet Name="AspNetRoles" EntityType="BCMY_StockModel.AspNetRole" />
+          <EntitySet Name="AspNetUserClaims" EntityType="BCMY_StockModel.AspNetUserClaim" />
+          <EntitySet Name="AspNetUserLogins" EntityType="BCMY_StockModel.AspNetUserLogin" />
+          <EntitySet Name="AspNetUsers" EntityType="BCMY_StockModel.AspNetUser" />
+          <EntitySet Name="TblBusinesses" EntityType="BCMY_StockModel.TblBusiness" />
+          <EntitySet Name="TblConfirmedOrderlineChanges" EntityType="BCMY_StockModel.TblConfirmedOrderlineChange" />
+          <EntitySet Name="TblContacts" EntityType="BCMY_StockModel.TblContact" />
+          <EntitySet Name="TblCurrencies" EntityType="BCMY_StockModel.TblCurrency" />
+          <EntitySet Name="TblCustomerSuppliers" EntityType="BCMY_StockModel.TblCustomerSupplier" />
+          <EntitySet Name="TblExchangeRates" EntityType="BCMY_StockModel.TblExchangeRate" />
+          <EntitySet Name="TblNegotiations" EntityType="BCMY_StockModel.TblNegotiation" />
+          <EntitySet Name="TblOrders" EntityType="BCMY_StockModel.TblOrder" />
+          <EntitySet Name="TblOrderLines" EntityType="BCMY_StockModel.TblOrderLine" />
+          <EntitySet Name="TblProductStocks" EntityType="BCMY_StockModel.TblProductStock" />
+          <EntitySet Name="TblStockUnavailableReasons" EntityType="BCMY_StockModel.TblStockUnavailableReason" />
+          <AssociationSet Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" Association="BCMY_StockModel.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
+            <End Role="AspNetUser" EntitySet="AspNetUsers" />
+            <End Role="AspNetUserClaim" EntitySet="AspNetUserClaims" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" Association="BCMY_StockModel.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId">
+            <End Role="AspNetUser" EntitySet="AspNetUsers" />
+            <End Role="AspNetUserLogin" EntitySet="AspNetUserLogins" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblConfir__conta__09C96D33" Association="BCMY_StockModel.FK__TblConfir__conta__09C96D33">
+            <End Role="TblContact" EntitySet="TblContacts" />
+            <End Role="TblConfirmedOrderlineChange" EntitySet="TblConfirmedOrderlineChanges" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblConfir__custo__08D548FA" Association="BCMY_StockModel.FK__TblConfir__custo__08D548FA">
+            <End Role="TblCustomerSupplier" EntitySet="TblCustomerSuppliers" />
+            <End Role="TblConfirmedOrderlineChange" EntitySet="TblConfirmedOrderlineChanges" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblConfir__order__05F8DC4F" Association="BCMY_StockModel.FK__TblConfir__order__05F8DC4F">
+            <End Role="TblOrder" EntitySet="TblOrders" />
+            <End Role="TblConfirmedOrderlineChange" EntitySet="TblConfirmedOrderlineChanges" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblConfir__order__06ED0088" Association="BCMY_StockModel.FK__TblConfir__order__06ED0088">
+            <End Role="TblOrderLine" EntitySet="TblOrderLines" />
+            <End Role="TblConfirmedOrderlineChange" EntitySet="TblConfirmedOrderlineChanges" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblConfir__produ__07E124C1" Association="BCMY_StockModel.FK__TblConfir__produ__07E124C1">
+            <End Role="TblProductStock" EntitySet="TblProductStocks" />
+            <End Role="TblConfirmedOrderlineChange" EntitySet="TblConfirmedOrderlineChanges" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblContac__custo__719CDDE7" Association="BCMY_StockModel.FK__TblContac__custo__719CDDE7">
+            <End Role="TblCustomerSupplier" EntitySet="TblCustomerSuppliers" />
+            <End Role="TblContact" EntitySet="TblContacts" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblOrder__contac__76619304" Association="BCMY_StockModel.FK__TblOrder__contac__76619304">
+            <End Role="TblContact" EntitySet="TblContacts" />
+            <End Role="TblOrder" EntitySet="TblOrders" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblOrder__curren__12FDD1B2" Association="BCMY_StockModel.FK__TblOrder__curren__12FDD1B2">
+            <End Role="TblCurrency" EntitySet="TblCurrencies" />
+            <End Role="TblOrder" EntitySet="TblOrders" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblNegoti__order__7E02B4CC" Association="BCMY_StockModel.FK__TblNegoti__order__7E02B4CC">
+            <End Role="TblOrder" EntitySet="TblOrders" />
+            <End Role="TblNegotiation" EntitySet="TblNegotiations" />
+          </AssociationSet>
+          <AssociationSet Name="FK__TblOrderL__order__7A3223E8" Association="BCMY_StockModel.FK__TblOrderL__order__7A3223E8">
+            <End Role="TblOrder" EntitySet="TblOrders" />
+            <End Role="TblOrderLine" EntitySet="TblOrderLines" />
+          </AssociationSet>
+          <AssociationSet Name="AspNetUserRoles" Association="BCMY_StockModel.AspNetUserRoles">
+            <End Role="AspNetRole" EntitySet="AspNetRoles" />
+            <End Role="AspNetUser" EntitySet="AspNetUsers" />
+          </AssociationSet>
           </EntityContainer>
         <ComplexType Name="SP_GetAllOrderViewModels_Result">
           <Property Type="Int32" Name="id" Nullable="false" />
@@ -1024,25 +1121,6 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
           <Property Type="String" Name="orderCreationDate" Nullable="true" MaxLength="30" />
           <Property Type="String" Name="orderCreationTime" Nullable="true" MaxLength="8" />
         </ComplexType>
-        <EntityType Name="TblCurrency">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
-          <Property Name="name" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="country" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="TblOrders" Relationship="BCMY_StockModel.FK__TblOrder__curren__12FDD1B2" FromRole="TblCurrency" ToRole="TblOrder" />
-        </EntityType>
-        <EntityType Name="TblExchangeRate">
-          <Key>
-            <PropertyRef Name="dateER" />
-          </Key>
-          <Property Name="dateER" Type="DateTime" Nullable="false" Precision="0" />
-          <Property Name="timeER" Type="Time" Nullable="false" Precision="7" />
-          <Property Name="usdValue" Type="Decimal" Nullable="false" Precision="10" Scale="4" />
-          <Property Name="euroValue" Type="Decimal" Nullable="false" Precision="10" Scale="4" />
-          <Property Name="manualInput" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
-        </EntityType>
         <ComplexType Name="SP_GetSuccessNumOfNegotiationsByProductId_Result">
           <Property Type="Int32" Name="id" Nullable="false" />
           <Property Type="Int32" Name="productId" Nullable="false" />
@@ -1059,110 +1137,6 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
           <Property Type="Int32" Name="contactId" Nullable="false" />
           <Property Type="String" Name="contactName" Nullable="false" MaxLength="101" />
         </ComplexType>
-        <EntityType Name="TblOrder">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="type" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="status" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="total" Type="Decimal" Precision="20" Scale="5" />
-          <Property Name="contactId" Type="Int32" />
-          <Property Name="creationDateTime" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="currencyId" Type="Int32" />
-          <Property Name="vat" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="TblContact" Relationship="BCMY_StockModel.FK__TblOrder__contac__76619304" FromRole="TblOrder" ToRole="TblContact" />
-          <NavigationProperty Name="TblCurrency" Relationship="BCMY_StockModel.FK__TblOrder__curren__12FDD1B2" FromRole="TblOrder" ToRole="TblCurrency" />
-          <NavigationProperty Name="TblNegotiations" Relationship="BCMY_StockModel.FK__TblNegoti__order__7E02B4CC" FromRole="TblOrder" ToRole="TblNegotiation" />
-          <NavigationProperty Name="TblOrderLines" Relationship="BCMY_StockModel.FK__TblOrderL__order__7A3223E8" FromRole="TblOrder" ToRole="TblOrderLine" />
-          <Property Name="pastOrder" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
-        </EntityType>
-        <Association Name="FK__TblOrder__contac__76619304">
-          <End Type="BCMY_StockModel.TblContact" Role="TblContact" Multiplicity="0..1" />
-          <End Type="BCMY_StockModel.TblOrder" Role="TblOrder" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="TblContact">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="TblOrder">
-              <PropertyRef Name="contactId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__TblOrder__curren__12FDD1B2">
-          <End Type="BCMY_StockModel.TblCurrency" Role="TblCurrency" Multiplicity="0..1" />
-          <End Type="BCMY_StockModel.TblOrder" Role="TblOrder" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="TblCurrency">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="TblOrder">
-              <PropertyRef Name="currencyId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__TblNegoti__order__7E02B4CC">
-          <End Type="BCMY_StockModel.TblOrder" Role="TblOrder" Multiplicity="0..1" />
-          <End Type="BCMY_StockModel.TblNegotiation" Role="TblNegotiation" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="TblOrder">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="TblNegotiation">
-              <PropertyRef Name="orderId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__TblOrderL__order__7A3223E8">
-          <End Type="BCMY_StockModel.TblOrder" Role="TblOrder" Multiplicity="0..1" />
-          <End Type="BCMY_StockModel.TblOrderLine" Role="TblOrderLine" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="TblOrder">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="TblOrderLine">
-              <PropertyRef Name="orderId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="TblCustomerSupplier">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="name" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="logo" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="addressLine1" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="addressLine2" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="addressLine3" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="town" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="county" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="postcode" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="country" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="telephone" Type="String" Nullable="false" MaxLength="25" FixedLength="false" Unicode="false" />
-          <Property Name="bank" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="vatNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="accountNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="sortcode" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="iban" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="swift" Type="String" MaxLength="11" FixedLength="false" Unicode="false" />
-          <Property Name="creationDateTime" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="inactiveDateTime" Type="DateTime" Precision="3" />
-          <Property Name="active" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="TblContacts" Relationship="BCMY_StockModel.FK__TblContac__custo__719CDDE7" FromRole="TblCustomerSupplier" ToRole="TblContact" />
-        </EntityType>
-        <Association Name="FK__TblContac__custo__719CDDE7">
-          <End Type="BCMY_StockModel.TblCustomerSupplier" Role="TblCustomerSupplier" Multiplicity="0..1" />
-          <End Type="BCMY_StockModel.TblContact" Role="TblContact" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="TblCustomerSupplier">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="TblContact">
-              <PropertyRef Name="customerSupplierId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <ComplexType Name="SP_GetAllCurrencies_Result">
           <Property Type="Int32" Name="id" Nullable="false" />
           <Property Type="String" Name="name" Nullable="false" MaxLength="500" />
@@ -1194,6 +1168,110 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
           <Property Type="String" Name="Date" Nullable="true" MaxLength="10" />
           <Property Type="Decimal" Name="Usd" Nullable="false" Precision="10" Scale="4" />
           <Property Type="Decimal" Name="Euro" Nullable="false" Precision="10" Scale="4" />
+        </ComplexType>
+        <ComplexType Name="SP_GetNumOfSuccessNegotiationsByProductId_Result">
+          <Property Type="Int32" Name="id" Nullable="false" />
+          <Property Type="Int32" Name="productId" Nullable="false" />
+          <Property Type="Decimal" Name="quantity" Nullable="true" Precision="10" Scale="5" />
+          <Property Type="Decimal" Name="negotiatedPricePerItem" Nullable="true" Precision="8" Scale="2" />
+          <Property Type="Decimal" Name="totalAmount" Nullable="true" Precision="8" Scale="2" />
+          <Property Type="String" Name="status" Nullable="false" MaxLength="20" />
+          <Property Type="DateTime" Name="negotiationDateTime" Nullable="false" Precision="23" />
+          <Property Type="Int32" Name="orderId" Nullable="true" />
+          <Property Type="String" Name="date" Nullable="true" MaxLength="30" />
+          <Property Type="String" Name="time" Nullable="true" MaxLength="8" />
+          <Property Type="Int32" Name="customerSupplierId" Nullable="false" />
+          <Property Type="String" Name="cusomerSupplierName" Nullable="false" MaxLength="30" />
+          <Property Type="Int32" Name="contactId" Nullable="false" />
+          <Property Type="String" Name="contactName" Nullable="false" MaxLength="101" />
+        </ComplexType>
+        <ComplexType Name="SP_GetProductsWithStockInfo_Result">
+          <Property Type="Int32" Name="productlistid" Nullable="false" />
+          <Property Type="String" Name="model" Nullable="false" MaxLength="150" />
+          <Property Type="Int32" Name="quantity" Nullable="false" />
+          <Property Type="String" Name="Description" Nullable="true" MaxLength="100" />
+          <Property Type="Int32" Name="weight_grams" Nullable="false" />
+          <Property Type="Int32" Name="volume_cm3" Nullable="false" />
+          <Property Type="String" Name="product_image" Nullable="true" MaxLength="100" />
+          <Property Type="String" Name="abbr" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="model_public" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="description_public" Nullable="true" MaxLength="50" />
+          <Property Type="DateTime" Name="dateUpdated" Nullable="true" Precision="23" />
+          <Property Type="String" Name="status" Nullable="true" MaxLength="10" />
+          <Property Type="Int32" Name="productbrandid" Nullable="false" />
+          <Property Type="String" Name="productbrandname" Nullable="false" MaxLength="40" />
+          <Property Type="Decimal" Name="marketvalue" Nullable="false" Precision="19" />
+          <Property Type="Int32" Name="actionID" Nullable="true" />
+          <Property Type="String" Name="productActionName" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="producttypeid" Nullable="false" MaxLength="100" />
+          <Property Type="Int32" Name="productcategory" Nullable="true" />
+          <Property Type="String" Name="ProductCatergoryName" Nullable="false" MaxLength="100" />
+          <Property Type="Int32" Name="productcondition" Nullable="true" />
+          <Property Type="String" Name="conditionName" Nullable="false" MaxLength="100" />
+          <Property Type="DateTime" Name="lastAmendedDate" Nullable="true" Precision="23" />
+          <Property Type="DateTime" Name="lastIncrementDate" Nullable="true" Precision="23" />
+          <Property Type="String" Name="lastAmendedDateValue" Nullable="true" MaxLength="30" />
+          <Property Type="String" Name="lastIncrementDateValue" Nullable="true" MaxLength="30" />
+          <Property Type="String" Name="lastAmendedTimeValue" Nullable="true" MaxLength="4000" />
+          <Property Type="String" Name="lastIncrementTimeValue" Nullable="true" MaxLength="4000" />
+          <Property Type="Int32" Name="stockCount" Nullable="false" />
+          <Property Type="String" Name="stockAmended" Nullable="true" MaxLength="3" />
+        </ComplexType>
+        <ComplexType Name="SP_SavePastOrderLineWithNegotiation_Result">
+          <Property Type="Int32" Name="id" Nullable="false" />
+          <Property Type="Int32" Name="productId" Nullable="false" />
+          <Property Type="Decimal" Name="quantity" Nullable="true" Precision="10" Scale="5" />
+          <Property Type="Decimal" Name="negotiatedPricePerItem" Nullable="true" Precision="10" Scale="5" />
+          <Property Type="Decimal" Name="totalAmount" Nullable="true" Precision="10" Scale="5" />
+          <Property Type="String" Name="status" Nullable="false" MaxLength="20" />
+          <Property Type="String" Name="orderLineQuantityStatus" Nullable="false" />
+          <Property Type="DateTime" Name="orderlineDateTime" Nullable="false" Precision="23" />
+          <Property Type="Int32" Name="orderId" Nullable="true" />
+          <Property Type="Int32" Name="brandId" Nullable="false" />
+          <Property Type="String" Name="brand" Nullable="false" MaxLength="40" />
+          <Property Type="Int32" Name="conditionId" Nullable="true" />
+          <Property Type="String" Name="condition" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="model" Nullable="false" MaxLength="150" />
+        </ComplexType>
+        <ComplexType Name="SP_GetChartsSalesPurchasesCountryDeviation_Result">
+          <Property Type="String" Name="country" Nullable="false" MaxLength="100" />
+          <Property Type="Decimal" Name="TotalValue" Nullable="true" Precision="38" Scale="5" />
+        </ComplexType>
+        <ComplexType Name="SP_GetOrderlineAndOrderDetails_Result">
+          <Property Type="Int32" Name="orderlineId" Nullable="false" />
+          <Property Type="Int32" Name="productListId" Nullable="false" />
+          <Property Type="String" Name="model" Nullable="false" MaxLength="150" />
+          <Property Type="Decimal" Name="quantity" Nullable="true" Precision="10" Scale="5" />
+          <Property Type="Decimal" Name="negotiatedPricePerItem" Nullable="true" Precision="10" Scale="5" />
+          <Property Type="Decimal" Name="marketValueInGBP" Nullable="false" Precision="19" />
+          <Property Type="Decimal" Name="marketValueInSpecificCurrencyForToday" Nullable="true" Precision="30" Scale="8" />
+          <Property Type="Decimal" Name="total" Nullable="true" Precision="10" Scale="5" />
+          <Property Type="String" Name="status" Nullable="false" MaxLength="20" />
+          <Property Type="DateTime" Name="orderlineDateTime" Nullable="false" Precision="23" />
+          <Property Type="String" Name="orderlineDate" Nullable="true" MaxLength="30" />
+          <Property Type="String" Name="orderlineTime" Nullable="true" MaxLength="8" />
+          <Property Type="Int32" Name="orderId" Nullable="true" />
+          <Property Type="String" Name="currency" Nullable="false" MaxLength="500" />
+          <Property Type="Int32" Name="contactId" Nullable="true" />
+          <Property Type="String" Name="contactFulName" Nullable="false" MaxLength="101" />
+          <Property Type="Int32" Name="customerId" Nullable="true" />
+          <Property Type="String" Name="customer" Nullable="false" MaxLength="30" />
+        </ComplexType>
+        <ComplexType Name="SP_SaveOrderlineDiscrepancyChange_Result">
+          <Property Type="Int32" Name="id" Nullable="false" />
+          <Property Type="Int32" Name="productId" Nullable="false" />
+          <Property Type="Decimal" Name="quantity" Nullable="true" Precision="10" Scale="5" />
+          <Property Type="Decimal" Name="negotiatedPricePerItem" Nullable="true" Precision="10" Scale="5" />
+          <Property Type="Decimal" Name="totalAmount" Nullable="true" Precision="10" Scale="5" />
+          <Property Type="String" Name="status" Nullable="false" MaxLength="20" />
+          <Property Type="String" Name="orderLineQuantityStatus" Nullable="false" />
+          <Property Type="DateTime" Name="orderlineDateTime" Nullable="false" Precision="23" />
+          <Property Type="Int32" Name="orderId" Nullable="true" />
+          <Property Type="Int32" Name="brandId" Nullable="false" />
+          <Property Type="String" Name="brand" Nullable="false" MaxLength="40" />
+          <Property Type="Int32" Name="conditionId" Nullable="true" />
+          <Property Type="String" Name="condition" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="model" Nullable="false" MaxLength="150" />
         </ComplexType>
         <EntityType Name="C__MigrationHistory">
           <Key>
@@ -1269,6 +1347,187 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
           <NavigationProperty Name="AspNetUserLogins" Relationship="BCMY_StockModel.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" FromRole="AspNetUser" ToRole="AspNetUserLogin" />
           <NavigationProperty Name="AspNetRoles" Relationship="BCMY_StockModel.AspNetUserRoles" FromRole="AspNetUser" ToRole="AspNetRole" />
         </EntityType>
+        <EntityType Name="TblBusiness">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="logo" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="addressLine1" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="addressLine2" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="addressLine3" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="postcode" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="country" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="bank" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="accountNumber" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="sortcode" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="iban" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="swift" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="TblConfirmedOrderlineChange">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="orderId" Type="Int32" Nullable="false" />
+          <Property Name="orderlineId" Type="Int32" Nullable="false" />
+          <Property Name="productlistId" Type="Int32" Nullable="false" />
+          <Property Name="model" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="customerId" Type="Int32" Nullable="false" />
+          <Property Name="customerName" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="contactId" Type="Int32" Nullable="false" />
+          <Property Name="contactFullName" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="promisedQuantity" Type="Int32" Nullable="false" />
+          <Property Name="promisedPricePerItem" Type="Decimal" Nullable="false" Precision="10" Scale="5" />
+          <Property Name="promisedTotal" Type="Decimal" Nullable="false" Precision="10" Scale="5" />
+          <Property Name="newQuantity" Type="Int32" Nullable="false" />
+          <Property Name="newPricePerItem" Type="Decimal" Nullable="false" Precision="10" Scale="5" />
+          <Property Name="newTotal" Type="Decimal" Nullable="false" Precision="10" Scale="5" />
+          <Property Name="updateStockStatus" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="updateCount" Type="Int32" Nullable="false" />
+          <Property Name="userRecorded" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="discrepancy" Type="Int32" annotation:StoreGeneratedPattern="Computed" />
+          <Property Name="changeDateTime" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="TblContact" Relationship="BCMY_StockModel.FK__TblConfir__conta__09C96D33" FromRole="TblConfirmedOrderlineChange" ToRole="TblContact" />
+          <NavigationProperty Name="TblCustomerSupplier" Relationship="BCMY_StockModel.FK__TblConfir__custo__08D548FA" FromRole="TblConfirmedOrderlineChange" ToRole="TblCustomerSupplier" />
+          <NavigationProperty Name="TblOrder" Relationship="BCMY_StockModel.FK__TblConfir__order__05F8DC4F" FromRole="TblConfirmedOrderlineChange" ToRole="TblOrder" />
+          <NavigationProperty Name="TblOrderLine" Relationship="BCMY_StockModel.FK__TblConfir__order__06ED0088" FromRole="TblConfirmedOrderlineChange" ToRole="TblOrderLine" />
+          <NavigationProperty Name="TblProductStock" Relationship="BCMY_StockModel.FK__TblConfir__produ__07E124C1" FromRole="TblConfirmedOrderlineChange" ToRole="TblProductStock" />
+        </EntityType>
+        <EntityType Name="TblContact">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="title" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="firstName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="lastName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="position" Type="String" MaxLength="55" FixedLength="false" Unicode="false" />
+          <Property Name="directDial" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="extension" Type="Int32" />
+          <Property Name="email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="status" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="customerSupplierId" Type="Int32" />
+          <NavigationProperty Name="TblConfirmedOrderlineChanges" Relationship="BCMY_StockModel.FK__TblConfir__conta__09C96D33" FromRole="TblContact" ToRole="TblConfirmedOrderlineChange" />
+          <NavigationProperty Name="TblCustomerSupplier" Relationship="BCMY_StockModel.FK__TblContac__custo__719CDDE7" FromRole="TblContact" ToRole="TblCustomerSupplier" />
+          <NavigationProperty Name="TblOrders" Relationship="BCMY_StockModel.FK__TblOrder__contac__76619304" FromRole="TblContact" ToRole="TblOrder" />
+        </EntityType>
+        <EntityType Name="TblCurrency">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="country" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="TblOrders" Relationship="BCMY_StockModel.FK__TblOrder__curren__12FDD1B2" FromRole="TblCurrency" ToRole="TblOrder" />
+        </EntityType>
+        <EntityType Name="TblCustomerSupplier">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="logo" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="addressLine1" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="addressLine2" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="addressLine3" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="town" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="county" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="postcode" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="country" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="telephone" Type="String" Nullable="false" MaxLength="25" FixedLength="false" Unicode="false" />
+          <Property Name="bank" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="vatNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="accountNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="sortcode" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="iban" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="swift" Type="String" MaxLength="11" FixedLength="false" Unicode="false" />
+          <Property Name="creationDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="inactiveDateTime" Type="DateTime" Precision="3" />
+          <Property Name="active" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="TblConfirmedOrderlineChanges" Relationship="BCMY_StockModel.FK__TblConfir__custo__08D548FA" FromRole="TblCustomerSupplier" ToRole="TblConfirmedOrderlineChange" />
+          <NavigationProperty Name="TblContacts" Relationship="BCMY_StockModel.FK__TblContac__custo__719CDDE7" FromRole="TblCustomerSupplier" ToRole="TblContact" />
+        </EntityType>
+        <EntityType Name="TblExchangeRate">
+          <Key>
+            <PropertyRef Name="dateER" />
+          </Key>
+          <Property Name="dateER" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="timeER" Type="Time" Nullable="false" Precision="7" />
+          <Property Name="usdValue" Type="Decimal" Nullable="false" Precision="10" Scale="4" />
+          <Property Name="euroValue" Type="Decimal" Nullable="false" Precision="10" Scale="4" />
+          <Property Name="manualInput" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="TblNegotiation">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="productId" Type="Int32" Nullable="false" />
+          <Property Name="quantity" Type="Decimal" Precision="10" Scale="5" />
+          <Property Name="negotiatedPricePerItem" Type="Decimal" Precision="10" Scale="5" />
+          <Property Name="totalAmount" Type="Decimal" Precision="10" Scale="5" />
+          <Property Name="status" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="negotiationDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="orderId" Type="Int32" />
+          <NavigationProperty Name="TblOrder" Relationship="BCMY_StockModel.FK__TblNegoti__order__7E02B4CC" FromRole="TblNegotiation" ToRole="TblOrder" />
+        </EntityType>
+        <EntityType Name="TblOrder">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="type" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="status" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="total" Type="Decimal" Precision="20" Scale="5" />
+          <Property Name="contactId" Type="Int32" />
+          <Property Name="creationDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="currencyId" Type="Int32" />
+          <Property Name="vat" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="pastOrder" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="TblConfirmedOrderlineChanges" Relationship="BCMY_StockModel.FK__TblConfir__order__05F8DC4F" FromRole="TblOrder" ToRole="TblConfirmedOrderlineChange" />
+          <NavigationProperty Name="TblContact" Relationship="BCMY_StockModel.FK__TblOrder__contac__76619304" FromRole="TblOrder" ToRole="TblContact" />
+          <NavigationProperty Name="TblCurrency" Relationship="BCMY_StockModel.FK__TblOrder__curren__12FDD1B2" FromRole="TblOrder" ToRole="TblCurrency" />
+          <NavigationProperty Name="TblNegotiations" Relationship="BCMY_StockModel.FK__TblNegoti__order__7E02B4CC" FromRole="TblOrder" ToRole="TblNegotiation" />
+          <NavigationProperty Name="TblOrderLines" Relationship="BCMY_StockModel.FK__TblOrderL__order__7A3223E8" FromRole="TblOrder" ToRole="TblOrderLine" />
+        </EntityType>
+        <EntityType Name="TblOrderLine">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="productId" Type="Int32" Nullable="false" />
+          <Property Name="quantity" Type="Decimal" Precision="10" Scale="5" />
+          <Property Name="negotiatedPricePerItem" Type="Decimal" Precision="10" Scale="5" />
+          <Property Name="totalAmount" Type="Decimal" Precision="10" Scale="5" />
+          <Property Name="status" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="orderLineQuantityStatus" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="orderlineDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="orderId" Type="Int32" />
+          <NavigationProperty Name="TblConfirmedOrderlineChanges" Relationship="BCMY_StockModel.FK__TblConfir__order__06ED0088" FromRole="TblOrderLine" ToRole="TblConfirmedOrderlineChange" />
+          <NavigationProperty Name="TblOrder" Relationship="BCMY_StockModel.FK__TblOrderL__order__7A3223E8" FromRole="TblOrderLine" ToRole="TblOrder" />
+        </EntityType>
+        <EntityType Name="TblProductStock">
+          <Key>
+            <PropertyRef Name="productId" />
+          </Key>
+          <Property Name="productId" Type="Int32" Nullable="false" />
+          <Property Name="quantity" Type="Int32" Nullable="false" />
+          <Property Name="stockCountAmended" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="lastAmendedDate" Type="DateTime" Precision="3" />
+          <Property Name="lastIncrementDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="TblConfirmedOrderlineChanges" Relationship="BCMY_StockModel.FK__TblConfir__produ__07E124C1" FromRole="TblProductStock" ToRole="TblConfirmedOrderlineChange" />
+        </EntityType>
+        <EntityType Name="TblStockUnavailableReason">
+          <Key>
+            <PropertyRef Name="reasonId" />
+          </Key>
+          <Property Name="reasonId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="reasonName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="reasonDescription" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+        </EntityType>
         <Association Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
           <End Type="BCMY_StockModel.AspNetUser" Role="AspNetUser" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -1297,169 +1556,136 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__TblConfir__conta__09C96D33">
+          <End Type="BCMY_StockModel.TblContact" Role="TblContact" Multiplicity="1" />
+          <End Type="BCMY_StockModel.TblConfirmedOrderlineChange" Role="TblConfirmedOrderlineChange" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblContact">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblConfirmedOrderlineChange">
+              <PropertyRef Name="contactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblConfir__custo__08D548FA">
+          <End Type="BCMY_StockModel.TblCustomerSupplier" Role="TblCustomerSupplier" Multiplicity="1" />
+          <End Type="BCMY_StockModel.TblConfirmedOrderlineChange" Role="TblConfirmedOrderlineChange" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblCustomerSupplier">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblConfirmedOrderlineChange">
+              <PropertyRef Name="customerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblConfir__order__05F8DC4F">
+          <End Type="BCMY_StockModel.TblOrder" Role="TblOrder" Multiplicity="1" />
+          <End Type="BCMY_StockModel.TblConfirmedOrderlineChange" Role="TblConfirmedOrderlineChange" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblOrder">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblConfirmedOrderlineChange">
+              <PropertyRef Name="orderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblConfir__order__06ED0088">
+          <End Type="BCMY_StockModel.TblOrderLine" Role="TblOrderLine" Multiplicity="1" />
+          <End Type="BCMY_StockModel.TblConfirmedOrderlineChange" Role="TblConfirmedOrderlineChange" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblOrderLine">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblConfirmedOrderlineChange">
+              <PropertyRef Name="orderlineId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblConfir__produ__07E124C1">
+          <End Type="BCMY_StockModel.TblProductStock" Role="TblProductStock" Multiplicity="1" />
+          <End Type="BCMY_StockModel.TblConfirmedOrderlineChange" Role="TblConfirmedOrderlineChange" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblProductStock">
+              <PropertyRef Name="productId" />
+            </Principal>
+            <Dependent Role="TblConfirmedOrderlineChange">
+              <PropertyRef Name="productlistId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblContac__custo__719CDDE7">
+          <End Type="BCMY_StockModel.TblCustomerSupplier" Role="TblCustomerSupplier" Multiplicity="0..1" />
+          <End Type="BCMY_StockModel.TblContact" Role="TblContact" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblCustomerSupplier">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblContact">
+              <PropertyRef Name="customerSupplierId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblOrder__contac__76619304">
+          <End Type="BCMY_StockModel.TblContact" Role="TblContact" Multiplicity="0..1" />
+          <End Type="BCMY_StockModel.TblOrder" Role="TblOrder" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblContact">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblOrder">
+              <PropertyRef Name="contactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblOrder__curren__12FDD1B2">
+          <End Type="BCMY_StockModel.TblCurrency" Role="TblCurrency" Multiplicity="0..1" />
+          <End Type="BCMY_StockModel.TblOrder" Role="TblOrder" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblCurrency">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblOrder">
+              <PropertyRef Name="currencyId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblNegoti__order__7E02B4CC">
+          <End Type="BCMY_StockModel.TblOrder" Role="TblOrder" Multiplicity="0..1" />
+          <End Type="BCMY_StockModel.TblNegotiation" Role="TblNegotiation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblOrder">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblNegotiation">
+              <PropertyRef Name="orderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__TblOrderL__order__7A3223E8">
+          <End Type="BCMY_StockModel.TblOrder" Role="TblOrder" Multiplicity="0..1" />
+          <End Type="BCMY_StockModel.TblOrderLine" Role="TblOrderLine" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TblOrder">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TblOrderLine">
+              <PropertyRef Name="orderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="AspNetUserRoles">
           <End Type="BCMY_StockModel.AspNetRole" Role="AspNetRole" Multiplicity="*" />
           <End Type="BCMY_StockModel.AspNetUser" Role="AspNetUser" Multiplicity="*" />
         </Association>
-        <ComplexType Name="SP_GetNumOfSuccessNegotiationsByProductId_Result">
-          <Property Type="Int32" Name="id" Nullable="false" />
-          <Property Type="Int32" Name="productId" Nullable="false" />
-          <Property Type="Decimal" Name="quantity" Nullable="true" Precision="10" Scale="5" />
-          <Property Type="Decimal" Name="negotiatedPricePerItem" Nullable="true" Precision="8" Scale="2" />
-          <Property Type="Decimal" Name="totalAmount" Nullable="true" Precision="8" Scale="2" />
-          <Property Type="String" Name="status" Nullable="false" MaxLength="20" />
-          <Property Type="DateTime" Name="negotiationDateTime" Nullable="false" Precision="23" />
-          <Property Type="Int32" Name="orderId" Nullable="true" />
-          <Property Type="String" Name="date" Nullable="true" MaxLength="30" />
-          <Property Type="String" Name="time" Nullable="true" MaxLength="8" />
-          <Property Type="Int32" Name="customerSupplierId" Nullable="false" />
-          <Property Type="String" Name="cusomerSupplierName" Nullable="false" MaxLength="30" />
-          <Property Type="Int32" Name="contactId" Nullable="false" />
-          <Property Type="String" Name="contactName" Nullable="false" MaxLength="101" />
-        </ComplexType>
-        <ComplexType Name="SP_GetProductsWithStockInfo_Result">
-          <Property Type="Int32" Name="productlistid" Nullable="false" />
-          <Property Type="String" Name="model" Nullable="false" MaxLength="150" />
-          <Property Type="Int32" Name="quantity" Nullable="false" />
-          <Property Type="String" Name="Description" Nullable="true" MaxLength="100" />
-          <Property Type="Int32" Name="weight_grams" Nullable="false" />
-          <Property Type="Int32" Name="volume_cm3" Nullable="false" />
-          <Property Type="String" Name="product_image" Nullable="true" MaxLength="100" />
-          <Property Type="String" Name="abbr" Nullable="true" MaxLength="50" />
-          <Property Type="String" Name="model_public" Nullable="true" MaxLength="50" />
-          <Property Type="String" Name="description_public" Nullable="true" MaxLength="50" />
-          <Property Type="DateTime" Name="dateUpdated" Nullable="true" Precision="23" />
-          <Property Type="String" Name="status" Nullable="true" MaxLength="10" />
-          <Property Type="Int32" Name="productbrandid" Nullable="false" />
-          <Property Type="String" Name="productbrandname" Nullable="false" MaxLength="40" />
-          <Property Type="Decimal" Name="marketvalue" Nullable="false" Precision="19" />
-          <Property Type="Int32" Name="actionID" Nullable="true" />
-          <Property Type="String" Name="productActionName" Nullable="false" MaxLength="50" />
-          <Property Type="String" Name="producttypeid" Nullable="false" MaxLength="100" />
-          <Property Type="Int32" Name="productcategory" Nullable="true" />
-          <Property Type="String" Name="ProductCatergoryName" Nullable="false" MaxLength="100" />
-          <Property Type="Int32" Name="productcondition" Nullable="true" />
-          <Property Type="String" Name="conditionName" Nullable="false" MaxLength="100" />
-          <Property Type="DateTime" Name="lastAmendedDate" Nullable="true" Precision="23" />
-          <Property Type="DateTime" Name="lastIncrementDate" Nullable="true" Precision="23" />
-          <Property Type="String" Name="lastAmendedDateValue" Nullable="true" MaxLength="30" />
-          <Property Type="String" Name="lastIncrementDateValue" Nullable="true" MaxLength="30" />
-          <Property Type="String" Name="lastAmendedTimeValue" Nullable="true" MaxLength="4000" />
-          <Property Type="String" Name="lastIncrementTimeValue" Nullable="true" MaxLength="4000" />
-          <Property Type="Int32" Name="stockCount" Nullable="false" />
-          <Property Type="String" Name="stockAmended" Nullable="true" MaxLength="3" />
-        </ComplexType>
-        <ComplexType Name="SP_SavePastOrderLineWithNegotiation_Result">
-          <Property Type="Int32" Name="id" Nullable="false" />
-          <Property Type="Int32" Name="productId" Nullable="false" />
-          <Property Type="Decimal" Name="quantity" Nullable="true" Precision="10" Scale="5" />
-          <Property Type="Decimal" Name="negotiatedPricePerItem" Nullable="true" Precision="10" Scale="5" />
-          <Property Type="Decimal" Name="totalAmount" Nullable="true" Precision="10" Scale="5" />
-          <Property Type="String" Name="status" Nullable="false" MaxLength="20" />
-          <Property Type="String" Name="orderLineQuantityStatus" Nullable="false" />
-          <Property Type="DateTime" Name="orderlineDateTime" Nullable="false" Precision="23" />
-          <Property Type="Int32" Name="orderId" Nullable="true" />
-          <Property Type="Int32" Name="brandId" Nullable="false" />
-          <Property Type="String" Name="brand" Nullable="false" MaxLength="40" />
-          <Property Type="Int32" Name="conditionId" Nullable="true" />
-          <Property Type="String" Name="condition" Nullable="false" MaxLength="100" />
-          <Property Type="String" Name="model" Nullable="false" MaxLength="150" />
-        </ComplexType>
-        <EntityType Name="TblStockUnavailableReason">
-          <Key>
-            <PropertyRef Name="reasonId" />
-            <PropertyRef Name="reasonName" />
-          </Key>
-          <Property Name="reasonId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="reasonName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="reasonDescription" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-        </EntityType>
-        <ComplexType Name="SP_GetChartsSalesPurchasesCountryDeviation_Result">
-          <Property Type="String" Name="country" Nullable="false" MaxLength="100" />
-          <Property Type="Decimal" Name="TotalValue" Nullable="true" Precision="38" Scale="5" />
-        </ComplexType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="BCMY_StockModelStoreContainer" CdmEntityContainer="BCMY_StockEntities">
-          <EntitySetMapping Name="TblBusinesses">
-            <EntityTypeMapping TypeName="BCMY_StockModel.TblBusiness">
-              <MappingFragment StoreEntitySet="TblBusiness">
-                <ScalarProperty Name="id" ColumnName="id" />
-                <ScalarProperty Name="name" ColumnName="name" />
-                <ScalarProperty Name="logo" ColumnName="logo" />
-                <ScalarProperty Name="addressLine1" ColumnName="addressLine1" />
-                <ScalarProperty Name="addressLine2" ColumnName="addressLine2" />
-                <ScalarProperty Name="addressLine3" ColumnName="addressLine3" />
-                <ScalarProperty Name="postcode" ColumnName="postcode" />
-                <ScalarProperty Name="country" ColumnName="country" />
-                <ScalarProperty Name="bank" ColumnName="bank" />
-                <ScalarProperty Name="accountNumber" ColumnName="accountNumber" />
-                <ScalarProperty Name="sortcode" ColumnName="sortcode" />
-                <ScalarProperty Name="iban" ColumnName="iban" />
-                <ScalarProperty Name="swift" ColumnName="swift" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="TblContacts">
-            <EntityTypeMapping TypeName="BCMY_StockModel.TblContact">
-              <MappingFragment StoreEntitySet="TblContact">
-                <ScalarProperty Name="id" ColumnName="id" />
-                <ScalarProperty Name="title" ColumnName="title" />
-                <ScalarProperty Name="firstName" ColumnName="firstName" />
-                <ScalarProperty Name="lastName" ColumnName="lastName" />
-                <ScalarProperty Name="position" ColumnName="position" />
-                <ScalarProperty Name="directDial" ColumnName="directDial" />
-                <ScalarProperty Name="extension" ColumnName="extension" />
-                <ScalarProperty Name="email" ColumnName="email" />
-                <ScalarProperty Name="status" ColumnName="status" />
-                <ScalarProperty Name="notes" ColumnName="notes" />
-                <ScalarProperty Name="customerSupplierId" ColumnName="customerSupplierId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="TblNegotiations">
-            <EntityTypeMapping TypeName="BCMY_StockModel.TblNegotiation">
-              <MappingFragment StoreEntitySet="TblNegotiation">
-                <ScalarProperty Name="id" ColumnName="id" />
-                <ScalarProperty Name="productId" ColumnName="productId" />
-                <ScalarProperty Name="quantity" ColumnName="quantity" />
-                <ScalarProperty Name="negotiatedPricePerItem" ColumnName="negotiatedPricePerItem" />
-                <ScalarProperty Name="totalAmount" ColumnName="totalAmount" />
-                <ScalarProperty Name="status" ColumnName="status" />
-                <ScalarProperty Name="negotiationDateTime" ColumnName="negotiationDateTime" />
-                <ScalarProperty Name="orderId" ColumnName="orderId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="TblOrderLines">
-            <EntityTypeMapping TypeName="BCMY_StockModel.TblOrderLine">
-              <MappingFragment StoreEntitySet="TblOrderLine">
-                <ScalarProperty Name="id" ColumnName="id" />
-                <ScalarProperty Name="productId" ColumnName="productId" />
-                <ScalarProperty Name="quantity" ColumnName="quantity" />
-                <ScalarProperty Name="negotiatedPricePerItem" ColumnName="negotiatedPricePerItem" />
-                <ScalarProperty Name="totalAmount" ColumnName="totalAmount" />
-                <ScalarProperty Name="status" ColumnName="status" />
-                <ScalarProperty Name="orderLineQuantityStatus" ColumnName="orderLineQuantityStatus" />
-                <ScalarProperty Name="orderlineDateTime" ColumnName="orderlineDateTime" />
-                <ScalarProperty Name="orderId" ColumnName="orderId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="TblProductStocks">
-            <EntityTypeMapping TypeName="BCMY_StockModel.TblProductStock">
-              <MappingFragment StoreEntitySet="TblProductStock">
-                <ScalarProperty Name="lastIncrementDate" ColumnName="lastIncrementDate" />
-                <ScalarProperty Name="lastAmendedDate" ColumnName="lastAmendedDate" />
-                <ScalarProperty Name="stockCountAmended" ColumnName="stockCountAmended" />
-                <ScalarProperty Name="productId" ColumnName="productId" />
-                <ScalarProperty Name="quantity" ColumnName="quantity" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <FunctionImportMapping FunctionImportName="SP_ConfirmOrder" FunctionName="BCMY_StockModel.Store.SP_ConfirmOrder" />
           <FunctionImportMapping FunctionImportName="SP_CreateOrder" FunctionName="BCMY_StockModel.Store.SP_CreateOrder" />
           <FunctionImportMapping FunctionImportName="SP_GetAllOrderViewModels" FunctionName="BCMY_StockModel.Store.SP_GetAllOrderViewModels">
@@ -1683,26 +1909,6 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-          <EntitySetMapping Name="TblCurrencies">
-            <EntityTypeMapping TypeName="BCMY_StockModel.TblCurrency">
-              <MappingFragment StoreEntitySet="TblCurrencies">
-                <ScalarProperty Name="country" ColumnName="country" />
-                <ScalarProperty Name="name" ColumnName="name" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="TblExchangeRates">
-            <EntityTypeMapping TypeName="BCMY_StockModel.TblExchangeRate">
-              <MappingFragment StoreEntitySet="TblExchangeRate">
-                <ScalarProperty Name="manualInput" ColumnName="manualInput" />
-                <ScalarProperty Name="euroValue" ColumnName="euroValue" />
-                <ScalarProperty Name="usdValue" ColumnName="usdValue" />
-                <ScalarProperty Name="timeER" ColumnName="timeER" />
-                <ScalarProperty Name="dateER" ColumnName="dateER" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <FunctionImportMapping FunctionImportName="SP_GetSuccessNumOfNegotiationsByProductId" FunctionName="BCMY_StockModel.Store.SP_GetSuccessNumOfNegotiationsByProductId">
             <ResultMapping>
               <ComplexTypeMapping TypeName="BCMY_StockModel.SP_GetSuccessNumOfNegotiationsByProductId_Result">
@@ -1724,47 +1930,6 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
             </ResultMapping>
           </FunctionImportMapping>
           <FunctionImportMapping FunctionImportName="SP_InserUpdateExchangeRates" FunctionName="BCMY_StockModel.Store.SP_InserUpdateExchangeRates" />
-          <EntitySetMapping Name="TblOrders">
-            <EntityTypeMapping TypeName="BCMY_StockModel.TblOrder">
-              <MappingFragment StoreEntitySet="TblOrder">
-                <ScalarProperty Name="pastOrder" ColumnName="pastOrder" />
-                <ScalarProperty Name="vat" ColumnName="vat" />
-                <ScalarProperty Name="currencyId" ColumnName="currencyId" />
-                <ScalarProperty Name="creationDateTime" ColumnName="creationDateTime" />
-                <ScalarProperty Name="contactId" ColumnName="contactId" />
-                <ScalarProperty Name="total" ColumnName="total" />
-                <ScalarProperty Name="status" ColumnName="status" />
-                <ScalarProperty Name="type" ColumnName="type" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="TblCustomerSuppliers">
-            <EntityTypeMapping TypeName="BCMY_StockModel.TblCustomerSupplier">
-              <MappingFragment StoreEntitySet="TblCustomerSupplier">
-                <ScalarProperty Name="active" ColumnName="active" />
-                <ScalarProperty Name="inactiveDateTime" ColumnName="inactiveDateTime" />
-                <ScalarProperty Name="creationDateTime" ColumnName="creationDateTime" />
-                <ScalarProperty Name="swift" ColumnName="swift" />
-                <ScalarProperty Name="iban" ColumnName="iban" />
-                <ScalarProperty Name="sortcode" ColumnName="sortcode" />
-                <ScalarProperty Name="accountNumber" ColumnName="accountNumber" />
-                <ScalarProperty Name="vatNumber" ColumnName="vatNumber" />
-                <ScalarProperty Name="bank" ColumnName="bank" />
-                <ScalarProperty Name="telephone" ColumnName="telephone" />
-                <ScalarProperty Name="country" ColumnName="country" />
-                <ScalarProperty Name="postcode" ColumnName="postcode" />
-                <ScalarProperty Name="county" ColumnName="county" />
-                <ScalarProperty Name="town" ColumnName="town" />
-                <ScalarProperty Name="addressLine3" ColumnName="addressLine3" />
-                <ScalarProperty Name="addressLine2" ColumnName="addressLine2" />
-                <ScalarProperty Name="addressLine1" ColumnName="addressLine1" />
-                <ScalarProperty Name="logo" ColumnName="logo" />
-                <ScalarProperty Name="name" ColumnName="name" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <FunctionImportMapping FunctionImportName="SP_GetAllCurrencies" FunctionName="BCMY_StockModel.Store.SP_GetAllCurrencies">
             <ResultMapping>
               <ComplexTypeMapping TypeName="BCMY_StockModel.SP_GetAllCurrencies_Result">
@@ -1812,84 +1977,6 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
           <FunctionImportMapping FunctionImportName="SP_IncreaseStockCount" FunctionName="BCMY_StockModel.Store.SP_IncreaseStockCount" />
           <FunctionImportMapping FunctionImportName="SP_ConfirmOrderLinesWithOrder" FunctionName="BCMY_StockModel.Store.SP_ConfirmOrderLinesWithOrder" />
           <FunctionImportMapping FunctionImportName="SP_ValidateAndSavePastExchangeRates" FunctionName="BCMY_StockModel.Store.SP_ValidateAndSavePastExchangeRates" />
-          <EntitySetMapping Name="C__MigrationHistory">
-            <EntityTypeMapping TypeName="BCMY_StockModel.C__MigrationHistory">
-              <MappingFragment StoreEntitySet="__MigrationHistory">
-                <ScalarProperty Name="ProductVersion" ColumnName="ProductVersion" />
-                <ScalarProperty Name="Model" ColumnName="Model" />
-                <ScalarProperty Name="ContextKey" ColumnName="ContextKey" />
-                <ScalarProperty Name="MigrationId" ColumnName="MigrationId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="AspNetRoles">
-            <EntityTypeMapping TypeName="BCMY_StockModel.AspNetRole">
-              <MappingFragment StoreEntitySet="AspNetRoles">
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="Description" ColumnName="Description" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="AspNetUserClaims">
-            <EntityTypeMapping TypeName="BCMY_StockModel.AspNetUserClaim">
-              <MappingFragment StoreEntitySet="AspNetUserClaims">
-                <ScalarProperty Name="ClaimValue" ColumnName="ClaimValue" />
-                <ScalarProperty Name="ClaimType" ColumnName="ClaimType" />
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="AspNetUserLogins">
-            <EntityTypeMapping TypeName="BCMY_StockModel.AspNetUserLogin">
-              <MappingFragment StoreEntitySet="AspNetUserLogins">
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="ProviderKey" ColumnName="ProviderKey" />
-                <ScalarProperty Name="LoginProvider" ColumnName="LoginProvider" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="AspNetUsers">
-            <EntityTypeMapping TypeName="BCMY_StockModel.AspNetUser">
-              <MappingFragment StoreEntitySet="AspNetUsers">
-                <ScalarProperty Name="UserName" ColumnName="UserName" />
-                <ScalarProperty Name="AccessFailedCount" ColumnName="AccessFailedCount" />
-                <ScalarProperty Name="LockoutEnabled" ColumnName="LockoutEnabled" />
-                <ScalarProperty Name="LockoutEndDateUtc" ColumnName="LockoutEndDateUtc" />
-                <ScalarProperty Name="TwoFactorEnabled" ColumnName="TwoFactorEnabled" />
-                <ScalarProperty Name="PhoneNumberConfirmed" ColumnName="PhoneNumberConfirmed" />
-                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
-                <ScalarProperty Name="SecurityStamp" ColumnName="SecurityStamp" />
-                <ScalarProperty Name="PasswordHash" ColumnName="PasswordHash" />
-                <ScalarProperty Name="EmailConfirmed" ColumnName="EmailConfirmed" />
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="Locked" ColumnName="Locked" />
-                <ScalarProperty Name="LastInvalidLoginAttemptTime" ColumnName="LastInvalidLoginAttemptTime" />
-                <ScalarProperty Name="InvalidLoginAttemptCount" ColumnName="InvalidLoginAttemptCount" />
-                <ScalarProperty Name="IsLoggedIn" ColumnName="IsLoggedIn" />
-                <ScalarProperty Name="LastLogoutTime" ColumnName="LastLogoutTime" />
-                <ScalarProperty Name="LastLogInTime" ColumnName="LastLogInTime" />
-                <ScalarProperty Name="RegistrationDate" ColumnName="RegistrationDate" />
-                <ScalarProperty Name="EmploymentDate" ColumnName="EmploymentDate" />
-                <ScalarProperty Name="Extension" ColumnName="Extension" />
-                <ScalarProperty Name="DirectDial" ColumnName="DirectDial" />
-                <ScalarProperty Name="Position" ColumnName="Position" />
-                <ScalarProperty Name="LastName" ColumnName="LastName" />
-                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
-                <ScalarProperty Name="Title" ColumnName="Title" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <AssociationSetMapping Name="AspNetUserRoles" TypeName="BCMY_StockModel.AspNetUserRoles" StoreEntitySet="AspNetUserRoles">
-            <EndProperty Name="AspNetUser">
-              <ScalarProperty Name="Id" ColumnName="UserId" />
-            </EndProperty>
-            <EndProperty Name="AspNetRole">
-              <ScalarProperty Name="Id" ColumnName="RoleId" />
-            </EndProperty>
-          </AssociationSetMapping>
           <FunctionImportMapping FunctionImportName="SP_CreatePastSalesOrder" FunctionName="BCMY_StockModel.Store.SP_CreatePastSalesOrder" />
           <FunctionImportMapping FunctionImportName="SP_DeleteOrder" FunctionName="BCMY_StockModel.Store.SP_DeleteOrder" />
           <FunctionImportMapping FunctionImportName="SP_DeleteOrRejectOrderline" FunctionName="BCMY_StockModel.Store.SP_DeleteOrRejectOrderline" />
@@ -1974,15 +2061,6 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
           <FunctionImportMapping FunctionImportName="SP_TransferConfirmedOLinesToNegotisTbl" FunctionName="BCMY_StockModel.Store.SP_TransferConfirmedOLinesToNegotisTbl" />
           <FunctionImportMapping FunctionImportName="SP_UpdateStockCount" FunctionName="BCMY_StockModel.Store.SP_UpdateStockCount" />
           <FunctionImportMapping FunctionImportName="SplitStringsByDelimiter" FunctionName="BCMY_StockModel.Store.SplitStringsByDelimiter" />
-          <EntitySetMapping Name="TblStockUnavailableReasons">
-            <EntityTypeMapping TypeName="BCMY_StockModel.TblStockUnavailableReason">
-              <MappingFragment StoreEntitySet="TblStockUnavailableReasons">
-                <ScalarProperty Name="reasonDescription" ColumnName="reasonDescription" />
-                <ScalarProperty Name="reasonName" ColumnName="reasonName" />
-                <ScalarProperty Name="reasonId" ColumnName="reasonId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <FunctionImportMapping FunctionImportName="CSVToTable" FunctionName="BCMY_StockModel.Store.CSVToTable" />
           <FunctionImportMapping FunctionImportName="SP_GetChartsSalesPurchasesCountryDeviation" FunctionName="BCMY_StockModel.Store.SP_GetChartsSalesPurchasesCountryDeviation">
             <ResultMapping>
@@ -1992,6 +2070,300 @@ warning 6002: The table/view 'BCMY_Stock.dbo.TblStockUnavailableReasons' does no
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="SP_GetOrderlineAndOrderDetails" FunctionName="BCMY_StockModel.Store.SP_GetOrderlineAndOrderDetails">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="BCMY_StockModel.SP_GetOrderlineAndOrderDetails_Result">
+                <ScalarProperty Name="orderlineId" ColumnName="orderlineId" />
+                <ScalarProperty Name="productListId" ColumnName="productListId" />
+                <ScalarProperty Name="model" ColumnName="model" />
+                <ScalarProperty Name="quantity" ColumnName="quantity" />
+                <ScalarProperty Name="negotiatedPricePerItem" ColumnName="negotiatedPricePerItem" />
+                <ScalarProperty Name="marketValueInGBP" ColumnName="marketValueInGBP" />
+                <ScalarProperty Name="marketValueInSpecificCurrencyForToday" ColumnName="marketValueInSpecificCurrencyForToday" />
+                <ScalarProperty Name="total" ColumnName="total" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="orderlineDateTime" ColumnName="orderlineDateTime" />
+                <ScalarProperty Name="orderlineDate" ColumnName="orderlineDate" />
+                <ScalarProperty Name="orderlineTime" ColumnName="orderlineTime" />
+                <ScalarProperty Name="orderId" ColumnName="orderId" />
+                <ScalarProperty Name="currency" ColumnName="currency" />
+                <ScalarProperty Name="contactId" ColumnName="contactId" />
+                <ScalarProperty Name="contactFulName" ColumnName="contactFulName" />
+                <ScalarProperty Name="customerId" ColumnName="customerId" />
+                <ScalarProperty Name="customer" ColumnName="customer" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="SP_SaveOrderlineDiscrepancyChange" FunctionName="BCMY_StockModel.Store.SP_SaveOrderlineDiscrepancyChange">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="BCMY_StockModel.SP_SaveOrderlineDiscrepancyChange_Result">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="productId" ColumnName="productId" />
+                <ScalarProperty Name="quantity" ColumnName="quantity" />
+                <ScalarProperty Name="negotiatedPricePerItem" ColumnName="negotiatedPricePerItem" />
+                <ScalarProperty Name="totalAmount" ColumnName="totalAmount" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="orderLineQuantityStatus" ColumnName="orderLineQuantityStatus" />
+                <ScalarProperty Name="orderlineDateTime" ColumnName="orderlineDateTime" />
+                <ScalarProperty Name="orderId" ColumnName="orderId" />
+                <ScalarProperty Name="brandId" ColumnName="brandId" />
+                <ScalarProperty Name="brand" ColumnName="brand" />
+                <ScalarProperty Name="conditionId" ColumnName="conditionId" />
+                <ScalarProperty Name="condition" ColumnName="condition" />
+                <ScalarProperty Name="model" ColumnName="model" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="C__MigrationHistory">
+            <EntityTypeMapping TypeName="BCMY_StockModel.C__MigrationHistory">
+              <MappingFragment StoreEntitySet="__MigrationHistory">
+                <ScalarProperty Name="ProductVersion" ColumnName="ProductVersion" />
+                <ScalarProperty Name="Model" ColumnName="Model" />
+                <ScalarProperty Name="ContextKey" ColumnName="ContextKey" />
+                <ScalarProperty Name="MigrationId" ColumnName="MigrationId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AspNetRoles">
+            <EntityTypeMapping TypeName="BCMY_StockModel.AspNetRole">
+              <MappingFragment StoreEntitySet="AspNetRoles">
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AspNetUserClaims">
+            <EntityTypeMapping TypeName="BCMY_StockModel.AspNetUserClaim">
+              <MappingFragment StoreEntitySet="AspNetUserClaims">
+                <ScalarProperty Name="ClaimValue" ColumnName="ClaimValue" />
+                <ScalarProperty Name="ClaimType" ColumnName="ClaimType" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AspNetUserLogins">
+            <EntityTypeMapping TypeName="BCMY_StockModel.AspNetUserLogin">
+              <MappingFragment StoreEntitySet="AspNetUserLogins">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="ProviderKey" ColumnName="ProviderKey" />
+                <ScalarProperty Name="LoginProvider" ColumnName="LoginProvider" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AspNetUsers">
+            <EntityTypeMapping TypeName="BCMY_StockModel.AspNetUser">
+              <MappingFragment StoreEntitySet="AspNetUsers">
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="AccessFailedCount" ColumnName="AccessFailedCount" />
+                <ScalarProperty Name="LockoutEnabled" ColumnName="LockoutEnabled" />
+                <ScalarProperty Name="LockoutEndDateUtc" ColumnName="LockoutEndDateUtc" />
+                <ScalarProperty Name="TwoFactorEnabled" ColumnName="TwoFactorEnabled" />
+                <ScalarProperty Name="PhoneNumberConfirmed" ColumnName="PhoneNumberConfirmed" />
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="SecurityStamp" ColumnName="SecurityStamp" />
+                <ScalarProperty Name="PasswordHash" ColumnName="PasswordHash" />
+                <ScalarProperty Name="EmailConfirmed" ColumnName="EmailConfirmed" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Locked" ColumnName="Locked" />
+                <ScalarProperty Name="LastInvalidLoginAttemptTime" ColumnName="LastInvalidLoginAttemptTime" />
+                <ScalarProperty Name="InvalidLoginAttemptCount" ColumnName="InvalidLoginAttemptCount" />
+                <ScalarProperty Name="IsLoggedIn" ColumnName="IsLoggedIn" />
+                <ScalarProperty Name="LastLogoutTime" ColumnName="LastLogoutTime" />
+                <ScalarProperty Name="LastLogInTime" ColumnName="LastLogInTime" />
+                <ScalarProperty Name="RegistrationDate" ColumnName="RegistrationDate" />
+                <ScalarProperty Name="EmploymentDate" ColumnName="EmploymentDate" />
+                <ScalarProperty Name="Extension" ColumnName="Extension" />
+                <ScalarProperty Name="DirectDial" ColumnName="DirectDial" />
+                <ScalarProperty Name="Position" ColumnName="Position" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblBusinesses">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblBusiness">
+              <MappingFragment StoreEntitySet="TblBusiness">
+                <ScalarProperty Name="swift" ColumnName="swift" />
+                <ScalarProperty Name="iban" ColumnName="iban" />
+                <ScalarProperty Name="sortcode" ColumnName="sortcode" />
+                <ScalarProperty Name="accountNumber" ColumnName="accountNumber" />
+                <ScalarProperty Name="bank" ColumnName="bank" />
+                <ScalarProperty Name="country" ColumnName="country" />
+                <ScalarProperty Name="postcode" ColumnName="postcode" />
+                <ScalarProperty Name="addressLine3" ColumnName="addressLine3" />
+                <ScalarProperty Name="addressLine2" ColumnName="addressLine2" />
+                <ScalarProperty Name="addressLine1" ColumnName="addressLine1" />
+                <ScalarProperty Name="logo" ColumnName="logo" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblConfirmedOrderlineChanges">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblConfirmedOrderlineChange">
+              <MappingFragment StoreEntitySet="TblConfirmedOrderlineChange">
+                <ScalarProperty Name="changeDateTime" ColumnName="changeDateTime" />
+                <ScalarProperty Name="discrepancy" ColumnName="discrepancy" />
+                <ScalarProperty Name="userRecorded" ColumnName="userRecorded" />
+                <ScalarProperty Name="updateCount" ColumnName="updateCount" />
+                <ScalarProperty Name="updateStockStatus" ColumnName="updateStockStatus" />
+                <ScalarProperty Name="newTotal" ColumnName="newTotal" />
+                <ScalarProperty Name="newPricePerItem" ColumnName="newPricePerItem" />
+                <ScalarProperty Name="newQuantity" ColumnName="newQuantity" />
+                <ScalarProperty Name="promisedTotal" ColumnName="promisedTotal" />
+                <ScalarProperty Name="promisedPricePerItem" ColumnName="promisedPricePerItem" />
+                <ScalarProperty Name="promisedQuantity" ColumnName="promisedQuantity" />
+                <ScalarProperty Name="contactFullName" ColumnName="contactFullName" />
+                <ScalarProperty Name="contactId" ColumnName="contactId" />
+                <ScalarProperty Name="customerName" ColumnName="customerName" />
+                <ScalarProperty Name="customerId" ColumnName="customerId" />
+                <ScalarProperty Name="model" ColumnName="model" />
+                <ScalarProperty Name="productlistId" ColumnName="productlistId" />
+                <ScalarProperty Name="orderlineId" ColumnName="orderlineId" />
+                <ScalarProperty Name="orderId" ColumnName="orderId" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblContacts">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblContact">
+              <MappingFragment StoreEntitySet="TblContact">
+                <ScalarProperty Name="customerSupplierId" ColumnName="customerSupplierId" />
+                <ScalarProperty Name="notes" ColumnName="notes" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="extension" ColumnName="extension" />
+                <ScalarProperty Name="directDial" ColumnName="directDial" />
+                <ScalarProperty Name="position" ColumnName="position" />
+                <ScalarProperty Name="lastName" ColumnName="lastName" />
+                <ScalarProperty Name="firstName" ColumnName="firstName" />
+                <ScalarProperty Name="title" ColumnName="title" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblCurrencies">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblCurrency">
+              <MappingFragment StoreEntitySet="TblCurrencies">
+                <ScalarProperty Name="country" ColumnName="country" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblCustomerSuppliers">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblCustomerSupplier">
+              <MappingFragment StoreEntitySet="TblCustomerSupplier">
+                <ScalarProperty Name="active" ColumnName="active" />
+                <ScalarProperty Name="inactiveDateTime" ColumnName="inactiveDateTime" />
+                <ScalarProperty Name="creationDateTime" ColumnName="creationDateTime" />
+                <ScalarProperty Name="swift" ColumnName="swift" />
+                <ScalarProperty Name="iban" ColumnName="iban" />
+                <ScalarProperty Name="sortcode" ColumnName="sortcode" />
+                <ScalarProperty Name="accountNumber" ColumnName="accountNumber" />
+                <ScalarProperty Name="vatNumber" ColumnName="vatNumber" />
+                <ScalarProperty Name="bank" ColumnName="bank" />
+                <ScalarProperty Name="telephone" ColumnName="telephone" />
+                <ScalarProperty Name="country" ColumnName="country" />
+                <ScalarProperty Name="postcode" ColumnName="postcode" />
+                <ScalarProperty Name="county" ColumnName="county" />
+                <ScalarProperty Name="town" ColumnName="town" />
+                <ScalarProperty Name="addressLine3" ColumnName="addressLine3" />
+                <ScalarProperty Name="addressLine2" ColumnName="addressLine2" />
+                <ScalarProperty Name="addressLine1" ColumnName="addressLine1" />
+                <ScalarProperty Name="logo" ColumnName="logo" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblExchangeRates">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblExchangeRate">
+              <MappingFragment StoreEntitySet="TblExchangeRate">
+                <ScalarProperty Name="manualInput" ColumnName="manualInput" />
+                <ScalarProperty Name="euroValue" ColumnName="euroValue" />
+                <ScalarProperty Name="usdValue" ColumnName="usdValue" />
+                <ScalarProperty Name="timeER" ColumnName="timeER" />
+                <ScalarProperty Name="dateER" ColumnName="dateER" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblNegotiations">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblNegotiation">
+              <MappingFragment StoreEntitySet="TblNegotiation">
+                <ScalarProperty Name="orderId" ColumnName="orderId" />
+                <ScalarProperty Name="negotiationDateTime" ColumnName="negotiationDateTime" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="totalAmount" ColumnName="totalAmount" />
+                <ScalarProperty Name="negotiatedPricePerItem" ColumnName="negotiatedPricePerItem" />
+                <ScalarProperty Name="quantity" ColumnName="quantity" />
+                <ScalarProperty Name="productId" ColumnName="productId" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblOrders">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblOrder">
+              <MappingFragment StoreEntitySet="TblOrder">
+                <ScalarProperty Name="pastOrder" ColumnName="pastOrder" />
+                <ScalarProperty Name="vat" ColumnName="vat" />
+                <ScalarProperty Name="currencyId" ColumnName="currencyId" />
+                <ScalarProperty Name="creationDateTime" ColumnName="creationDateTime" />
+                <ScalarProperty Name="contactId" ColumnName="contactId" />
+                <ScalarProperty Name="total" ColumnName="total" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="type" ColumnName="type" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblOrderLines">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblOrderLine">
+              <MappingFragment StoreEntitySet="TblOrderLine">
+                <ScalarProperty Name="orderId" ColumnName="orderId" />
+                <ScalarProperty Name="orderlineDateTime" ColumnName="orderlineDateTime" />
+                <ScalarProperty Name="orderLineQuantityStatus" ColumnName="orderLineQuantityStatus" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="totalAmount" ColumnName="totalAmount" />
+                <ScalarProperty Name="negotiatedPricePerItem" ColumnName="negotiatedPricePerItem" />
+                <ScalarProperty Name="quantity" ColumnName="quantity" />
+                <ScalarProperty Name="productId" ColumnName="productId" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblProductStocks">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblProductStock">
+              <MappingFragment StoreEntitySet="TblProductStock">
+                <ScalarProperty Name="lastIncrementDate" ColumnName="lastIncrementDate" />
+                <ScalarProperty Name="lastAmendedDate" ColumnName="lastAmendedDate" />
+                <ScalarProperty Name="stockCountAmended" ColumnName="stockCountAmended" />
+                <ScalarProperty Name="quantity" ColumnName="quantity" />
+                <ScalarProperty Name="productId" ColumnName="productId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TblStockUnavailableReasons">
+            <EntityTypeMapping TypeName="BCMY_StockModel.TblStockUnavailableReason">
+              <MappingFragment StoreEntitySet="TblStockUnavailableReasons">
+                <ScalarProperty Name="reasonDescription" ColumnName="reasonDescription" />
+                <ScalarProperty Name="reasonName" ColumnName="reasonName" />
+                <ScalarProperty Name="reasonId" ColumnName="reasonId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <AssociationSetMapping Name="AspNetUserRoles" TypeName="BCMY_StockModel.AspNetUserRoles" StoreEntitySet="AspNetUserRoles">
+            <EndProperty Name="AspNetUser">
+              <ScalarProperty Name="Id" ColumnName="UserId" />
+            </EndProperty>
+            <EndProperty Name="AspNetRole">
+              <ScalarProperty Name="Id" ColumnName="RoleId" />
+            </EndProperty>
+          </AssociationSetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
