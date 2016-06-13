@@ -407,8 +407,8 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <label for="orderlineIdDf" class="fontWeightNormal">Market Value GBP - </label>
-                                        <label id="orderlineIdDf" class="darkBlueFont">£ {{vm.marketValueInGBP}}</label>
+                                        <label for="orderlineIdDf" class="fontWeightNormal">Market value GBP -</label>
+                                        <label id="orderlineIdDf" class="darkBlueFont">£{{vm.marketValueInGBP}}</label>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="prodIdDf" class="fontWeightNormal">Market Value {{vm.currency}} - </label>
@@ -458,7 +458,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <label for="DisDf" class="fontWeightNormal col-md-4" style="text-align:right">Discrepancy (+/-) -</label>
-                                        <input type="text" id="DisDf" class="darkBlueFont" ng-model="vm.difference" />
+                                        <input type="text" id="DisDf" class="darkBlueFont" ng-model="vm.difference" ng-disabled="true"/>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -472,7 +472,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <label for="newQtyDf" class="fontWeightNormal col-md-4" style="text-align:right">New Qty - </label>
-                                        <input id="newQtyDf" class="darkBlueFont" ng-model="vm.newQty" />
+                                        <input id="newQtyDf" class="darkBlueFont" ng-model="vm.newQty" ng-change="vm.onNewQtyChange()"/>
                                     </div>                                                                   
                                 </div>
                                 <div class="row">
@@ -488,13 +488,13 @@
                                 <div class="row">                                    
                                     <div class="col-md-12">
                                         <label for="newPriceDf" class="fontWeightNormal col-md-4" style="text-align:right">New Price -</label>
-                                        <input id="newPriceDf" class="darkBlueFont" ng-model="vm.newPrice" />
+                                        <input id="newPriceDf" class="darkBlueFont" ng-model="vm.newPrice" ng-change="vm.onNewPriceChange()"/>
                                     </div>                                    
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <label for="newTotDf" class="fontWeightNormal col-md-4" style="text-align:right">New Total - </label>
-                                        <input id="newTotDf" class="darkBlueFont" ng-model="vm.newTotal" />
+                                        <input id="newTotDf" class="darkBlueFont" ng-model="vm.newTotal" ng-disabled="true"/>
                                     </div>
                                 </div>
                                 <div class="row">

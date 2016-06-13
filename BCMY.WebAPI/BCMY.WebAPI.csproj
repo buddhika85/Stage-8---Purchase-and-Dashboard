@@ -242,6 +242,7 @@
     <Compile Include="Controllers\DiscrepancyController.cs" />
     <Compile Include="Controllers\ExchangeRateController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\InternalAppController.cs" />
     <Compile Include="Controllers\NegotiationController.cs" />
     <Compile Include="Controllers\OrderController.cs" />
     <Compile Include="Controllers\OrderLineController.cs" />

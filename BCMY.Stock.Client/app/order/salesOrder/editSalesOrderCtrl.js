@@ -162,6 +162,13 @@
         vm.recordDiscrepancy = function () {
             recordConfirmedOrderlineChange($http, vm);
         };
+
+        vm.onNewQtyChange = function () {
+            onNewQtyChange(vm);
+        };
+        vm.onNewPriceChange = function () {
+            onNewPriceChange(vm);
+        };
     }
 
     // authorise button access based on user roles
@@ -1378,25 +1385,25 @@
                 vm.productListId = data.productListId;
                 vm.productModel = data.model;
                 vm.availableStock = data.availableStock;
-                vm.marketValueInGBP = data.marketValueInGBP;
+                vm.marketValueInGBP = RoundUpTo(parseFloat(data.marketValueInGBP), 2);
                 vm.currency = data.currency;
-                vm.marketValueInSpecificCurrencyDf = data.marketValueInSpecificCurrencyForToday;
+                vm.marketValueInSpecificCurrencyDf = RoundUpTo(parseFloat(data.marketValueInSpecificCurrencyForToday), 2);
                 vm.customerId = data.customerId;
                 vm.customerSupllier = data.customer;
                 vm.contactId = data.contactId;
                 vm.contact = data.contactFulName;
                 vm.orderId = data.orderId;
                 vm.prevQty = data.quantity;
-                vm.prePPI = data.negotiatedPricePerItem;
-                vm.prevTotal = data.total;
+                vm.prePPI = RoundUpTo(parseFloat(data.negotiatedPricePerItem), 2);
+                vm.prevTotal = RoundUpTo(parseFloat(data.total), 2);
                 vm.difference = '0';
                 vm.reasonForDifference = '-1';
-                vm.newQty = '0';
-                vm.newPrice = '0.0';
-                vm.newTotal = '0.0';
+                vm.newQty = vm.prevQty;
+                vm.newPrice = vm.prePPI;
+                vm.newTotal = vm.prevTotal;
                 vm.newStatus = 'in negotiation';
                 vm.stockUpdateOption = 'Add to Stock';
-                vm.updateStocCountkDf = '0'
+                vm.updateStocCountkDf = '0';
                 vm.errorDf = '';
                 vm.scope.$evalAsync();
             }
@@ -1419,8 +1426,27 @@
         });
     }
 
+    function onNewQtyChange(vm) {
+        //alert("qty change");           
+        if (isNaN($.trim(vm.newQty)) == false) {
+            vm.difference = parseInt(vm.newQty) - vm.prevQty;
+            vm.updateStocCountkDf = vm.difference;
+            vm.newTotal = RoundUpTo(parseFloat(vm.newPrice) * parseFloat(vm.newQty), 2);
+        }
+        else {
+            vm.newQty = vm.prevQty;
+            vm.difference = 0;
+            vm.updateStocCountkDf = 0;
+        }
+    }
+
+    function onNewPriceChange(vm) {
+        vm.newTotal = RoundUpTo(parseFloat(vm.newPrice) * parseFloat(vm.newQty), 2);
+    }
+
     function recordConfirmedOrderlineChange($http, vm) {
         alert('addDiscrepancyOlineNegotiation');
+        var isValid = validateConfirmedOrderlineChange(vm);
         var serverUrl = 'https://localhost:44302/api/Discrepancy?productListId=' + vm.productListId + '&availableStock=' + vm.availableStock +
             '&status=' + vm.newStatus + '&orderIdVal=' + vm.orderId + '&orderlineId=' + vm.orderlineId +
             '&model=' + vm.productModel + '&customerId=' + vm.customerId + '&customerName=' + vm.customerSupllier +
@@ -1443,6 +1469,11 @@
             DisplayErrorMessage('error - web service access to save change to confimed orderline');
             vm.errorDf = 'error - web service access to save change to confimed orderline';
         });
+    }
+
+    function validateConfirmedOrderlineChange(vm)
+    {
+        
     }
 
     // reject orderline

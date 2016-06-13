@@ -218,6 +218,7 @@
     <Compile Include="ViewModels\ContactsViewModel.cs" />
     <Compile Include="ViewModels\NegotiationViewModel.cs" />
     <Compile Include="ViewModels\OrderlineAndOrderInfoViewModel.cs" />
+    <Compile Include="ViewModels\OrderlineBriefViewModel.cs" />
     <Compile Include="ViewModels\OrderLineViewModel.cs" />
     <Compile Include="ViewModels\OrderViewModel.cs" />
     <Compile Include="ViewModels\ProductBrandViewModel.cs" />
